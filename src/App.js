@@ -1,23 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route, useFetcher } from "react-router-dom";
+import { Feed } from "./pages/feedPage";
+import { Link } from "react-router-dom";
+import { SignUpPage } from "./pages/signUpPage";
+import { LoginPage } from "./pages/loginPage";
+import { Content } from "./pages/contentPage";
+import { ProfilePage } from "./pages/profilePage";
+import { ProfileSettings } from "./pages/profileSettingsPage";
+import { Nav } from "./nav/nav";
+import { About } from "./pages/about";
+import "./styles/App.css";
+import { useEffect, useState } from "react";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="nav">
+        <Nav />
+      </div>
+      <div className="body">
+        <Routes>
+          <Route path="/" element={<Feed />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signUp" element={<SignUpPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/content" element={<Content />} />
+          <Route path="/settings" element={<ProfileSettings />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,16 @@
+nav {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+nav {
+  justify-content: flex-start;
+  position: absolute;
+  height: 100%;
+  width: 15%;
+
+  border-right: 2px solid rgb(181, 181, 181);
+}
