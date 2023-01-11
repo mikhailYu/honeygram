@@ -1,8 +1,25 @@
 import "../styles/profile.css";
-
 import { ProfilePreviewPic } from "../profile/profilePreviewPic";
+import { useEffect, useState } from "react";
 
-export function ProfilePage() {
+export function ProfilePage(props) {
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+
+  useEffect(() => {
+    props
+      .getUserInfo()
+      .then((val) => {
+        setUsername(val.username);
+        setDisplayName(val.displayName);
+        setBio(val.bio);
+      })
+      .catch(() => {
+        console.log("Profile Data still retrieving...");
+      });
+  }, [props.userInfo]);
+
   return (
     <div className="profileCont">
       <div className="profileInfoCont">
@@ -17,7 +34,7 @@ export function ProfilePage() {
         </div>
         <div className="profileTextCont">
           <div className="profileNameCont">
-            <p>User Name</p>
+            <p>{username}</p>
             <button className="profilePageFollowBtn">Follow</button>
             <button className="profilePageEditBtn">Edit</button>
           </div>
@@ -28,10 +45,10 @@ export function ProfilePage() {
           </div>
           <div className="profileDescCont">
             <div className="profileDescTitles">
-              <p>Test User</p>
-              <p>Polar Bear</p>
+              <p>{username}</p>
+              <p>{displayName}</p>
             </div>
-            <p className="profileDescText">Hi, how's it going?</p>
+            <p className="profileDescText">{bio}</p>
           </div>
         </div>
       </div>

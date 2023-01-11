@@ -1,14 +1,51 @@
 import { Link } from "react-router-dom";
 import "../styles/signUp.css";
-export function SignUpPage() {
+import { useState } from "react";
+import { Auth } from "../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+export function SignUpPage(props) {
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerUsername, setRegisterUsername] = useState("");
+
+  async function register() {
+    try {
+      await createUserWithEmailAndPassword(
+        Auth,
+        registerEmail,
+        registerPassword
+      );
+      props.createNewUser(registerUsername);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
   return (
     <div className="signUpPageCont">
       <div className="signUpBox">
-        <input type="email" placeholder="New Email" />
-        <input type="password" placeholder="New Password" />
-        <input type="text" placeholder="Display Name" />
-
-        <Link to="/settings">Create account</Link>
+        <input
+          type="email"
+          placeholder="New Email"
+          onChange={(event) => {
+            setRegisterEmail(event.target.value);
+          }}
+        />
+        <input
+          type="password"
+          placeholder="New Password"
+          onChange={(event) => {
+            setRegisterPassword(event.target.value);
+          }}
+        />
+        <input
+          type="text"
+          placeholder="Username"
+          onChange={(event) => {
+            setRegisterUsername(event.target.value);
+          }}
+        />
+        <button onClick={register}>Create account</button>
       </div>
     </div>
   );

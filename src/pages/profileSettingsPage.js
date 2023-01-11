@@ -1,13 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/settings.css";
 import { ProfileDefaultPic } from "../profile/profileDefaultPics";
-export function ProfileSettings() {
+export function ProfileSettings(props) {
   const [bioLength, setBioLength] = useState("0/150");
+  const [userInfo, setUserInfo] = useState(null);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [displayNameInput, setDisplayNameInput] = useState("");
+  const [genderInput, setGenderInput] = useState("");
+  const [bioInput, setBioInput] = useState("");
 
+  useEffect(() => {
+    props.getUserInfo().then((val) => {
+      if (val !== null) {
+        setUserInfo(val);
+        setUsernameInput(val.username);
+        setDisplayNameInput(val.displayName);
+        setGenderInput(val.gender);
+        setBioInput(val.bio);
+      }
+    });
+  }, [props.userInfo]);
+
+  function handleUsername(e) {
+    setUsernameInput(e.target.value);
+  }
+  function handleDisplayName(e) {
+    setDisplayNameInput(e.target.value);
+  }
+  function handleGender(e) {
+    setGenderInput(e.target.value);
+  }
   function handleBio(e) {
     setBioLength(e.target.value.length + "/150");
+    setBioInput(e.target.value);
   }
+
+  function confirmSettings() {
+    props.overWriteProfileSettings(
+      usernameInput,
+      displayNameInput,
+      genderInput,
+      bioInput
+    );
+  }
+
   return (
     <div className="settingsPageCont">
       <div className="settingsBox">
@@ -19,7 +56,9 @@ export function ProfileSettings() {
             <input
               className="settingsUsernameInput"
               type="text"
-              placeholder="Username"
+              defaultValue={usernameInput}
+              placeholder={"Username"}
+              onChange={handleUsername}
             />
           </div>
         </div>
@@ -32,7 +71,9 @@ export function ProfileSettings() {
             <input
               className="settingsNameInput"
               type="text"
+              defaultValue={displayNameInput}
               placeholder="Display Name"
+              onChange={handleDisplayName}
             />
           </div>
         </div>
@@ -61,7 +102,12 @@ export function ProfileSettings() {
           </div>
           <div className="settingsInputBox">
             <form className="settingsGenderForm">
-              <select className="settingsGender">
+              <select
+                className="settingsGender"
+                onChange={handleGender}
+                value={genderInput}
+              >
+                <option value="">Choose an option</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
@@ -81,11 +127,12 @@ export function ProfileSettings() {
               className="settingsBio"
               maxLength={"150"}
               onChange={handleBio}
+              defaultValue={bioInput}
             ></textarea>
             <div className="bioLength">{bioLength}</div>
           </div>
         </div>
-        <Link to={"/profile"}>Confirm</Link>
+        <button onClick={confirmSettings}>Confirm</button>
       </div>
     </div>
   );

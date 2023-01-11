@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import "../styles/nav.css";
 
-export function Nav() {
+export function Nav(props) {
   return (
     <nav>
       <Link to="/">
@@ -14,7 +14,14 @@ export function Nav() {
       <Link to="/content">content</Link>
       <Link to="/settings">settings</Link>
       <Link to="/about">about</Link>
-      <Link to="/login">Log Out</Link>
+      <Link
+        to="/login"
+        onClick={() => {
+          props.logout();
+        }}
+      >
+        Log Out
+      </Link>
     </nav>
   );
 }
