@@ -1,4 +1,4 @@
-import { Routes, Route, useFetcher } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Feed } from "./pages/feedPage";
 import { db } from "./firebaseConfig";
 import { SignUpPage } from "./pages/signUpPage";
@@ -12,12 +12,15 @@ import "./styles/App.css";
 import { useEffect, useState } from "react";
 import { Auth } from "./firebaseConfig";
 import { set, ref, onValue, update } from "firebase/database";
+import CreatePostPage from "./pages/createPostPage";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 function App() {
   const [user, setUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     onAuthStateChanged(Auth, (user) => {
@@ -63,12 +66,14 @@ function App() {
           displayName: "",
           email: user.email,
           username: username,
-          profilePic: "",
+          profilePic: null,
           gender: "",
           bio: "",
           followers: [""],
           following: [""],
           posts: [""],
+        }).then(() => {
+          window.location.href = "/settings";
         });
       }
     });
@@ -79,18 +84,25 @@ function App() {
     setUser(null);
   }
 
-  function overWriteProfileSettings(username, displayName, gender, bio) {
+  function overWriteProfileSettings(
+    username,
+    displayName,
+    gender,
+    bio,
+    profilePicName
+  ) {
     update(ref(db, "users/" + user.uid), {
       displayName: displayName,
       email: user.email,
       username: username,
-      profilePic: "",
+      profilePic: profilePicName,
       gender: gender,
       bio: bio,
     })
       .then(() => {
+        const userUid = user.uid;
         updateUserInfo();
-        window.location.href = "/profile";
+        navigate("/profile/" + userUid, { state: { ownerUid: userUid } });
       })
       .catch((err) => {
         console.log(err);
@@ -104,23 +116,23 @@ function App() {
       </div>
       <div className="body">
         <Routes>
-          <Route path="/" element={<Feed />} />
+          <Route exact path="/" element={<Feed />} />
           <Route path="/login" element={<LoginPage logout={logout} />} />
           <Route
             path="/signUp"
             element={<SignUpPage createNewUser={createNewUser} />}
           />
+          <Route path="/newPost" element={<CreatePostPage />}></Route>
           <Route
+            exact
             path="/profile"
-            element={
-              <ProfilePage
-                getUser={getUser}
-                getUserInfo={getUserInfo}
-                userInfo={userInfo}
-              />
-            }
+            element={<ProfilePage getUser={getUser} />}
           />
-          <Route path="/content" element={<Content />} />
+          <Route
+            path="/profile/:uid"
+            element={<ProfilePage getUser={getUser} />}
+          />
+          <Route path="/post" element={<Content />} />
           <Route
             path="/settings"
             element={

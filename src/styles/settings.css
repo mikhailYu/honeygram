@@ -58,6 +58,10 @@
   gap: 10px;
 }
 
+.inputProfilePic {
+  display: none;
+}
+
 .profileDefaultPic,
 .customPic {
   width: 70px;

@@ -1,0 +1,44 @@
+.createPostCont,
+.newPostUploadButtonCont,
+.newPostPreview,
+.createPostDescInput {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.createPostCont {
+  width: 100%;
+  height: 100%;
+  justify-content: flex-start;
+}
+
+.newPostUploadButtonCont {
+  border: 2px dashed gray;
+  border-radius: 5px;
+  height: 40%;
+  width: 40%;
+  background-color: rgba(255, 255, 255, 0);
+
+  font-size: 1em;
+}
+
+.newPostUploadButtonCont:hover {
+  cursor: pointer;
+  font-size: 1.05em;
+}
+
+.newPostPreview {
+  height: 40%;
+  width: 40%;
+  background-color: rgb(51, 45, 71);
+}
+
+.createPostDescInput {
+  width: 40%;
+  border: 1px solid gray;
+  height: 10%;
+
+  align-content: flex-start;
+}
