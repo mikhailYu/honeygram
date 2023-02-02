@@ -9,15 +9,19 @@ export function SignUpPage(props) {
   const [registerUsername, setRegisterUsername] = useState("");
 
   async function register() {
-    try {
-      await createUserWithEmailAndPassword(
-        Auth,
-        registerEmail,
-        registerPassword
-      );
-      props.createNewUser(registerUsername);
-    } catch (error) {
-      console.log(error.message);
+    if (registerUsername !== "") {
+      try {
+        await createUserWithEmailAndPassword(
+          Auth,
+          registerEmail,
+          registerPassword
+        );
+        props.createNewUser(registerUsername);
+      } catch (error) {
+        console.log(error.message);
+      }
+    } else {
+      alert("Please enter a username");
     }
   }
 

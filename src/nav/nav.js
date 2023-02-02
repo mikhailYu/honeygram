@@ -14,7 +14,7 @@ export function Nav(props) {
       <Link to="/profile" state={{ ownerUid: "" }}>
         profile
       </Link>
-      <Link to="/post">content</Link>
+      <Link to="post/:ID">content</Link>
       <Link to="/settings">settings</Link>
       <Link to="/about">about</Link>
       <Link

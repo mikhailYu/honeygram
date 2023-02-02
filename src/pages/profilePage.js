@@ -4,9 +4,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import GetProfileOwner from "../profile/getProfileOwner";
 import { onValue } from "firebase/database";
-import { ref } from "firebase/storage";
-import { getDownloadURL } from "firebase/storage";
-import { Storage } from "../firebaseConfig";
+import RetrieveImg from "../general/retrieveImage";
+import uniqid from "uniqid";
 
 export function ProfilePage(props) {
   const location = useLocation();
@@ -16,6 +15,7 @@ export function ProfilePage(props) {
   const [owner, setOwner] = useState(null);
   const [upperButton, setUpperButton] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
+  const [profileContent, setProfileContent] = useState(null);
 
   useEffect(() => {
     if (location.state !== null) {
@@ -43,20 +43,34 @@ export function ProfilePage(props) {
       setBio(owner.bio);
       getProfilePic(owner.profilePic);
       toggleUpperButtons();
+      loadPosts();
       console.log("Profile info set to user: " + owner.username);
     }
   }, [owner]);
 
+  function loadPosts() {
+    if (!owner.posts || owner.posts.length <= 0 || owner.posts[0] === "") {
+      const noPostsDiv = <p>User has no posts</p>;
+      setProfileContent(noPostsDiv);
+    } else {
+      const postsArr = owner.posts.reverse().map((postInfo) => {
+        return (
+          <ProfilePreviewPic
+            key={uniqid()}
+            postInfo={postInfo}
+            uid={owner.uid}
+          />
+        );
+      });
+
+      setProfileContent(postsArr);
+    }
+  }
+
   function getProfilePic(picName) {
     if (owner !== null) {
-      const pathRef = ref(
-        Storage,
-        "profileImages/" + owner.uid + "/" + picName
-      );
-
-      getDownloadURL(pathRef).then((url) => {
-        const urlString = url.toString();
-        setProfilePic(urlString);
+      RetrieveImg("profileImages", owner.uid, picName).then((val) => {
+        setProfilePic(val);
       });
     }
   }
@@ -110,16 +124,7 @@ export function ProfilePage(props) {
         </div>
       </div>
 
-      <div className="profileContentCont">
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-        <ProfilePreviewPic />
-      </div>
+      <div className="profileContentCont">{profileContent}</div>
     </div>
   );
 }

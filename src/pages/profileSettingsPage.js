@@ -3,6 +3,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Storage } from "../firebaseConfig";
 import "../styles/settings.css";
 import { ProfileDefaultPic } from "../profile/profileDefaultPics";
+import RetrieveImg from "../general/retrieveImage";
 import uniqid from "uniqid";
 export function ProfileSettings(props) {
   const [bioLength, setBioLength] = useState("0/150");
@@ -38,11 +39,9 @@ export function ProfileSettings(props) {
 
   function getCustomPic(profilePic, uid) {
     if (profilePic !== null) {
-      const pathRef = ref(Storage, "profileImages/" + uid + "/" + profilePic);
-
-      getDownloadURL(pathRef).then((url) => {
-        const urlString = url.toString();
-        setCustomPicDisplay(urlString);
+      setProfilePicName(profilePic);
+      RetrieveImg("profileImages", uid, profilePic).then((val) => {
+        setCustomPicDisplay(val);
       });
     }
   }
@@ -53,9 +52,6 @@ export function ProfileSettings(props) {
     }
   }
 
-  function handleUsername(e) {
-    setUsernameInput(e.target.value);
-  }
   function handleDisplayName(e) {
     setDisplayNameInput(e.target.value);
   }
@@ -73,11 +69,6 @@ export function ProfileSettings(props) {
     }
     const imageName = uniqid();
     setProfilePicName(imageName);
-    const imageRef = ref(Storage, "profileImages/" + userUid + "/" + imageName);
-
-    uploadBytes(imageRef, imageUpload).then(() => {
-      console.log("Image Sent");
-    });
   }
 
   function confirmSettings() {
@@ -86,7 +77,8 @@ export function ProfileSettings(props) {
       displayNameInput,
       genderInput,
       bioInput,
-      profilePicName
+      profilePicName,
+      imageUpload
     );
   }
 
@@ -102,8 +94,7 @@ export function ProfileSettings(props) {
               className="settingsUsernameInput"
               type="text"
               defaultValue={usernameInput}
-              placeholder={"Username"}
-              onChange={handleUsername}
+              readOnly
             />
           </div>
         </div>
@@ -139,8 +130,12 @@ export function ProfileSettings(props) {
               <input
                 className="inputProfilePic"
                 type="file"
+                accept={
+                  "image/png, image/jpg, image/jpeg, image/svg, image/tiff"
+                }
                 onChange={(event) => {
                   setImageUpload(event.target.files[0]);
+                  event.target.value = null;
                 }}
               />
               <button
