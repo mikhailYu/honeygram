@@ -8,9 +8,11 @@ import { ContentComment } from "../contentPage/contentComment";
 import "../styles/Content.css";
 import RetrieveImg from "../general/retrieveImage";
 import { ContentDesc } from "../contentPage/contentDesc";
-
+import { useNavigate } from "react-router-dom";
 import uniqid from "uniqid";
+
 export function Content(props) {
+  const navigate = useNavigate();
   const [profilePic, setProfilePic] = useState(null);
   const [postImg, setPostImg] = useState(null);
   const [postInfo, setPostInfo] = useState(null);
@@ -67,6 +69,7 @@ export function Content(props) {
           <ContentDesc
             profilePic={val}
             ownerName={owner.displayName}
+            ownerUid={owner.uid}
             desc={postInfo.postDesc}
           />
         );
@@ -168,6 +171,12 @@ export function Content(props) {
     props.updateCommentLikes(postInfo.postID, likesArr, index);
   }
 
+  function toProfile() {
+    navigate("/profile/" + owner.uid, {
+      state: { ownerUid: owner.uid },
+    });
+  }
+
   return (
     <div className="contentPageCont">
       <div
@@ -180,11 +189,12 @@ export function Content(props) {
         <div className="contentPageSideTopCont">
           <div
             className="contentPageUserPic"
+            onClick={toProfile}
             style={{
               backgroundImage: "url(" + profilePic + ")",
             }}
           ></div>
-          <p>{ownerUsername}</p>
+          <p onClick={toProfile}> {ownerUsername}</p>
           <div></div>
           {deleteIcon}
         </div>

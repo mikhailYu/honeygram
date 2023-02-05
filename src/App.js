@@ -72,9 +72,6 @@ function App() {
           profilePic: null,
           gender: "",
           bio: "",
-          followers: [""],
-          following: [""],
-          posts: [""],
         }).then(() => {
           window.location.href = "/settings";
         });

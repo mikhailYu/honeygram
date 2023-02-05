@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ref, get, onValue } from "firebase/database";
 import { db } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 import { Auth } from "../firebaseConfig";
 import RetrieveImg from "../general/retrieveImage";
 
@@ -11,6 +12,8 @@ export function ContentComment(props) {
   const [date, setDate] = useState(null);
   const [likes, setLikes] = useState(null);
   const [deleteIcon, setDeleteIcon] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setDate(props.info.date);
@@ -81,9 +84,16 @@ export function ContentComment(props) {
     props.updateLikesSort(newLikesArr, props.info.commentID);
   }
 
+  function toProfile() {
+    navigate("/profile/" + props.info.commenter, {
+      state: { ownerUid: props.info.commenter },
+    });
+  }
+
   return (
     <div className="contentCommentCont">
       <div
+        onClick={toProfile}
         className="contentCommentIcon"
         style={{
           backgroundImage: "url(" + profilePic + ")",
@@ -91,7 +101,7 @@ export function ContentComment(props) {
       ></div>
       <div className="contentCommentText">
         <div className="contentCommentTop">
-          <p>{displayName}</p>
+          <p onClick={toProfile}>{displayName}</p>
           <p>{commentVal}</p>
         </div>
         <div className="contentCommentBottom">
