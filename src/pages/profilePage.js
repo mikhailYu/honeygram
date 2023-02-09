@@ -18,9 +18,10 @@ export function ProfilePage(props) {
   const [upperButton, setUpperButton] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
   const [profileContent, setProfileContent] = useState(null);
-
+  const [loadedOwner, setLoadedOwner] = useState("");
   const [postCount, setPostCount] = useState("");
-  const [followerCount, setFollowerCount] = useState("");
+  const [followerDisplay, setFollowerDisplay] = useState("");
+  const [followerCount, setFollowerCount] = useState(null);
   const [followingCount, setFollowingCount] = useState("");
 
   useEffect(() => {
@@ -43,13 +44,13 @@ export function ProfilePage(props) {
   }, [location.state]);
 
   useEffect(() => {
-    if (owner !== null) {
+    if (owner !== null && owner.uid !== loadedOwner) {
+      setLoadedOwner(owner.uid);
       setUsername(owner.username);
       setDisplayName(owner.displayName);
       setBio(owner.bio);
       getProfilePic(owner.profilePic);
       setUpStats();
-
       loadPosts();
       toggleUpperButtons();
       console.log("Profile info set to user: " + owner.username);
@@ -86,11 +87,16 @@ export function ProfilePage(props) {
     }
   }
 
+  useEffect(() => {
+    constructProperFollowGrammar();
+    if (owner) {
+      toggleUpperButtons();
+    }
+  }, [followerCount]);
+
   function setUpStats() {
     let numOfPosts = "";
-    let numOfFollowers = "";
     let numOfFollowing = "";
-    const currentUser = Auth.currentUser;
 
     if (!owner.posts) {
       numOfPosts = "0 posts";
@@ -100,14 +106,6 @@ export function ProfilePage(props) {
       numOfPosts = owner.posts.length + " posts";
     }
 
-    if (!owner.followers) {
-      numOfFollowers = "0 followers";
-    } else if (owner.followers.length === 1) {
-      numOfFollowers = "1 follower";
-    } else {
-      numOfFollowers = owner.followers.length + " followers";
-    }
-
     if (!owner.following) {
       numOfFollowing = "0 following";
     } else {
@@ -115,8 +113,15 @@ export function ProfilePage(props) {
     }
 
     setPostCount(numOfPosts);
-    setFollowerCount(numOfFollowers);
     setFollowingCount(numOfFollowing);
+
+    // setting up followers V
+
+    if (!owner.followers) {
+      setFollowerCount(0);
+    } else {
+      setFollowerCount(owner.followers.length);
+    }
   }
 
   function getProfilePic(picName) {
@@ -129,7 +134,7 @@ export function ProfilePage(props) {
 
   function toggleUpperButtons() {
     props.getUser().then((val) => {
-      if (val !== null) {
+      if (val.uid !== null && owner.uid !== null) {
         if (val.uid === owner.uid) {
           setUpperButton(
             <Link className="profilePageEditBtn" to={"/settings"}>
@@ -161,12 +166,15 @@ export function ProfilePage(props) {
     get(userRef).then((snapshot) => {
       if (!owner.followers) {
         newFollowersArr = [currentUser.uid];
+        setFollowerCount(1);
       } else if (owner.followers.includes(currentUser.uid)) {
+        setFollowerCount(followerCount - 1);
         newFollowersArr = owner.followers.filter((user) => {
           return user !== currentUser.uid;
         });
       } else {
         let arr = owner.followers;
+        setFollowerCount(followerCount + 1);
         newFollowersArr = arr.concat(currentUser.uid);
       }
 
@@ -190,6 +198,16 @@ export function ProfilePage(props) {
     });
   }
 
+  function constructProperFollowGrammar() {
+    if (followerCount == null) {
+      setFollowerDisplay("");
+    } else if (followerCount == 1) {
+      setFollowerDisplay("1 follower");
+    } else {
+      setFollowerDisplay(followerCount + " followers");
+    }
+  }
+
   return (
     <div className="profileCont">
       <div className="profileInfoCont">
@@ -208,7 +226,7 @@ export function ProfilePage(props) {
           </div>
           <div className="profileStatsCont">
             <p>{postCount}</p>
-            <p>{followerCount}</p>
+            <p>{followerDisplay}</p>
             <p>{followingCount}</p>
           </div>
           <div className="profileDescCont">

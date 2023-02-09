@@ -164,7 +164,7 @@ function App() {
       });
   }
 
-  function deletePost(postInfo) {
+  function deletePost(postInfo, goToProfile) {
     const postID = postInfo.postID;
     const ownerUid = postInfo.ownerUid;
     const ownerRef = ref(db, "users/" + ownerUid);
@@ -208,21 +208,17 @@ function App() {
         deleteObject(imageRef)
           .then(() => {
             console.log("post deleted");
-            navigate("/profile/" + ownerUid, { state: { ownerUid: ownerUid } });
+            if (goToProfile) {
+              navigate("/profile/" + ownerUid, {
+                state: { ownerUid: ownerUid },
+              });
+            }
           })
           .catch((err) => {
             console.log(err);
           });
       }
     }
-  }
-
-  function updatePostLikes(postID, likesArr) {
-    const postRef = ref(db, "posts/" + postID);
-
-    update(postRef, {
-      likes: likesArr,
-    });
   }
 
   function updateCommentLikes(postID, likesArr, index) {
@@ -233,7 +229,7 @@ function App() {
     });
   }
 
-  function postComment(postID, commentVal) {
+  function postComment(postID, commentVal, commentID) {
     const postRef = ref(db, "posts/" + postID);
 
     get(postRef).then((snapshot) => {
@@ -247,10 +243,10 @@ function App() {
         commenter: userInfo.uid,
         commentVal: commentVal,
         date: date,
-        commentID: uniqid(),
+        commentID: commentID,
       };
 
-      commentsArr.push(newComment);
+      commentsArr = [newComment, ...commentsArr];
 
       update(postRef, {
         comments: commentsArr,
@@ -309,7 +305,6 @@ function App() {
                 deletePost={deletePost}
                 postComment={postComment}
                 deleteComment={deleteComment}
-                updatePostLikes={updatePostLikes}
                 updateCommentLikes={updateCommentLikes}
               />
             }

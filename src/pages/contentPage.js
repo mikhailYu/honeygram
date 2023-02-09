@@ -10,6 +10,7 @@ import RetrieveImg from "../general/retrieveImage";
 import { ContentDesc } from "../contentPage/contentDesc";
 import { useNavigate } from "react-router-dom";
 import uniqid from "uniqid";
+import { TogglePostLike } from "../general/postInteractions";
 
 export function Content(props) {
   const navigate = useNavigate();
@@ -23,17 +24,17 @@ export function Content(props) {
   const [date, setDate] = useState(null);
   const [commentInput, setCommentInput] = useState(null);
   const [commentSection, setCommentSection] = useState(null);
-  const [likes, setLikes] = useState(null);
+  const [update, setUpdate] = useState(true);
+  const [loadedOwner, setLoadedOwner] = useState("");
+  const [likesDisplay, setLikesDisplay] = useState("");
+  const [likesCount, setLikesCount] = useState(null);
+
   useEffect(() => {
-    const url = window.location.href;
-
-    const postID = url.split("post/")[1];
-    const postRef = ref(db, "posts/" + postID);
-
-    onValue(postRef, (snapshot) => {
-      setPostInfo(snapshot.val());
-    });
-  }, []);
+    if (update) {
+      getPostInfo();
+      setUpdate(false);
+    }
+  }, [update]);
 
   useEffect(() => {
     if (postInfo !== null) {
@@ -50,9 +51,10 @@ export function Content(props) {
   }, [postInfo]);
 
   useEffect(() => {
-    if (owner !== null) {
+    if (owner !== null && owner.uid !== loadedOwner) {
       const uid = owner.uid;
       const imgID = postInfo.postID;
+      setLoadedOwner(uid);
 
       setOwnerUsername(owner.displayName);
       deleteIconCheck();
@@ -78,10 +80,32 @@ export function Content(props) {
       if (postInfo.date) {
         setDate(postInfo.date);
       }
-
+      getLikes();
+    } else if (owner !== null) {
       getLikes();
     }
   }, [owner]);
+
+  useEffect(() => {
+    if (likesCount === null) {
+      setLikesDisplay("");
+    } else if (likesCount === 1) {
+      setLikesDisplay("1 like");
+    } else {
+      setLikesDisplay(likesCount + " likes");
+    }
+  }, [likesCount]);
+
+  function getPostInfo() {
+    const url = window.location.href;
+
+    const postID = url.split("post/")[1];
+    const postRef = ref(db, "posts/" + postID);
+
+    onValue(postRef, (snapshot) => {
+      setPostInfo(snapshot.val());
+    });
+  }
 
   function deleteCommentRetrieveData(commentID) {
     props.deleteComment(postInfo.postID, commentID);
@@ -89,13 +113,15 @@ export function Content(props) {
 
   function loadComments() {
     if (postInfo.comments) {
-      let commentsArr = postInfo.comments.reverse().map((post) => {
+      let commentsArr = postInfo.comments.map((info) => {
         return (
           <ContentComment
             key={uniqid()}
-            info={post}
+            info={info}
+            postID={postInfo.postID}
             deleteComment={deleteCommentRetrieveData}
             updateLikesSort={updateLikesSort}
+            local={false}
           />
         );
       });
@@ -112,7 +138,7 @@ export function Content(props) {
         <p
           className="contentDeleteIcon"
           onClick={() => {
-            props.deletePost(postInfo);
+            props.deletePost(postInfo, true);
           }}
         >
           X
@@ -129,46 +155,75 @@ export function Content(props) {
       alert("Please input a comment");
       return;
     }
-    props.postComment(postInfo.postID, commentInput);
+    const uid = Auth.currentUser.uid;
+    const newCommentID = uniqid();
+    let newCommentInfo = {
+      commentID: newCommentID,
+      commentVal: commentInput,
+      commenter: uid,
+      date: "Now",
+    };
+
+    props.postComment(postInfo.postID, commentInput, newCommentID);
 
     document.getElementById("commentInputPost").value = null;
     setCommentInput(null);
+    setUpdate(true);
+    postLocally(newCommentInfo);
+  }
+
+  function postLocally(newCommentInfo) {
+    let newComment = (
+      <ContentComment
+        key={uniqid()}
+        info={newCommentInfo}
+        postId={postInfo.postID}
+        deleteComment={deleteCommentRetrieveData}
+        updateLikesSort={updateLikesSort}
+        local={true}
+      />
+    );
+
+    if (commentSection) {
+      setCommentSection([newComment, ...commentSection]);
+    } else {
+      setCommentSection([newComment]);
+    }
   }
 
   function getLikes() {
     if (!postInfo.likes || postInfo.likes[0] === "") {
-      setLikes("0 likes");
+      setLikesCount(0);
       return;
     }
 
     const likeCount = postInfo.likes.length;
-    setLikes(likeCount + " likes");
+    setLikesCount(likeCount);
   }
 
   function handleLikePost() {
-    let newLikesArr = [];
-    const currentUserUid = Auth.currentUser.uid;
-
-    if (!postInfo.likes || postInfo.likes[0] === "") {
-      newLikesArr = [currentUserUid];
-    } else if (postInfo.likes.includes(currentUserUid)) {
-      newLikesArr = postInfo.likes.filter((user) => {
-        return user !== currentUserUid;
-      });
-    } else {
-      let arr = postInfo.likes;
-      newLikesArr = arr.concat(currentUserUid);
-    }
-
-    props.updatePostLikes(postInfo.postID, newLikesArr);
+    TogglePostLike(postInfo, postInfo.postID);
+    setUpdate(true);
   }
 
   function updateLikesSort(likesArr, targetID) {
     const isID = (comment) => comment.commentID === targetID;
-    const commentsArr = postInfo.comments;
-    const index = commentsArr.reverse().findIndex(isID);
+    const commentsArr = getUpdatedCommentsArr();
+    const index = commentsArr.findIndex(isID);
 
     props.updateCommentLikes(postInfo.postID, likesArr, index);
+  }
+
+  function getUpdatedCommentsArr() {
+    const url = window.location.href;
+    const postID = url.split("post/")[1];
+    const postRef = ref(db, "posts/" + postID);
+    let returnVal = "";
+
+    onValue(postRef, (snapshot) => {
+      returnVal = snapshot.val().comments;
+    });
+    return returnVal;
   }
 
   function toProfile() {
@@ -206,7 +261,7 @@ export function Content(props) {
           <div className="contentPageIconsCont">
             <p onClick={handleLikePost}>🧡</p>
           </div>
-          <p>{likes}</p>
+          <p>{likesDisplay}</p>
           <p>{date}</p>
           <div className="contentPageAddCommentCont">
             <input
