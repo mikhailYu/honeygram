@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/honeygram/static/css/main.f84db5e9.css",
-    "main.js": "/honeygram/static/js/main.a63b3bdd.js",
+    "main.js": "/honeygram/static/js/main.aebe2282.js",
     "static/media/testPolar.jpg": "/honeygram/static/media/testPolar.e482af805acecf0625a4.jpg",
     "index.html": "/honeygram/index.html",
     "main.f84db5e9.css.map": "/honeygram/static/css/main.f84db5e9.css.map",
-    "main.a63b3bdd.js.map": "/honeygram/static/js/main.a63b3bdd.js.map"
+    "main.aebe2282.js.map": "/honeygram/static/js/main.aebe2282.js.map"
   },
   "entrypoints": [
     "static/css/main.f84db5e9.css",
-    "static/js/main.a63b3bdd.js"
+    "static/js/main.aebe2282.js"
   ]
 }
