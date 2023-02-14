@@ -1,13 +1,17 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import "../styles/nav.css";
 
 export function Nav(props) {
+  const [user, setUser] = useState(props.getUser());
   return (
     <nav>
       <Link to="/">
         <h1>HONEYGRAM</h1>
       </Link>
-      <Link to="/">Home</Link>
+      <Link state={{ ownerUid: user.uid }} to="/">
+        Home
+      </Link>
       <Link to="/signUp">Sign Up</Link>
       <Link to="/login">login</Link>
       <Link to="/newPost">New Post</Link>
@@ -17,14 +21,13 @@ export function Nav(props) {
       <Link to="post/:ID">content</Link>
       <Link to="/settings">settings</Link>
       <Link to="/about">about</Link>
-      <Link
-        to="/login"
+      <p
         onClick={() => {
           props.logout();
         }}
       >
         Log Out
-      </Link>
+      </p>
 
       <Link
         to="/profile/lAZOOpDUDjOnsObvfU8KCKQNAJG2"

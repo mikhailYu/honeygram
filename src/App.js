@@ -26,7 +26,7 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    onAuthStateChanged(Auth, (user) => {
+    let unsubscribe = onAuthStateChanged(Auth, (user) => {
       if (user) {
         setUser(user);
 
@@ -35,6 +35,7 @@ function App() {
         console.log("not signed in");
       }
     });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -73,7 +74,7 @@ function App() {
           gender: "",
           bio: "",
         }).then(() => {
-          window.location.href = "/settings";
+          navigate("/settings");
         });
       }
     });
@@ -82,6 +83,7 @@ function App() {
   async function logout() {
     await signOut(Auth);
     setUser(null);
+    navigate("/login");
   }
 
   function overWriteProfileSettings(
@@ -228,6 +230,14 @@ function App() {
       likes: likesArr,
     });
   }
+  function updateFollows(newFollowingArr, newFollowersArr, userRef, ownerRef) {
+    update(userRef, {
+      following: newFollowingArr,
+    });
+    update(ownerRef, {
+      followers: newFollowersArr,
+    });
+  }
 
   function postComment(postID, commentVal, commentID) {
     const postRef = ref(db, "posts/" + postID);
@@ -254,10 +264,6 @@ function App() {
     });
   }
 
-  function postCommentAsReply() {
-    // replies to a comment
-  }
-
   function deleteComment(postID, commentID) {
     const postRef = ref(db, "posts/" + postID);
 
@@ -277,11 +283,21 @@ function App() {
   return (
     <div className="App">
       <div className="nav">
-        <Nav logout={logout} />
+        <Nav getUser={getUser} logout={logout} />
       </div>
       <div className="body">
         <Routes>
-          <Route exact path="/" element={<Feed />} />
+          <Route
+            exact
+            path="/"
+            element={
+              <Feed
+                updateFollows={updateFollows}
+                getUser={getUser}
+                logout={logout}
+              />
+            }
+          />
           <Route path="/login" element={<LoginPage logout={logout} />} />
           <Route
             path="/signUp"

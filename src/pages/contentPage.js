@@ -177,7 +177,7 @@ export function Content(props) {
       <ContentComment
         key={uniqid()}
         info={newCommentInfo}
-        postId={postInfo.postID}
+        postID={postInfo.postID}
         deleteComment={deleteCommentRetrieveData}
         updateLikesSort={updateLikesSort}
         local={true}

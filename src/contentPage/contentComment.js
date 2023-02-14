@@ -1,109 +1,130 @@
 import { useEffect, useState } from "react";
-import { ref, get, onValue } from "firebase/database";
+import { ref, get, onValue, val } from "firebase/database";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "../firebaseConfig";
 import RetrieveImg from "../general/retrieveImage";
+
 import { ToggleCommentLike } from "../general/postInteractions";
 
 export function ContentComment(props) {
+  const [commentID, setCommentID] = useState("");
   const [profilePic, setProfilePic] = useState(null);
   const [displayName, setDisplayName] = useState(null);
   const [commentVal, setCommentVal] = useState(null);
   const [date, setDate] = useState(null);
   const [deleteIcon, setDeleteIcon] = useState(null);
   const [styleDisplay, setStyleDisplay] = useState({ display: "flex" });
-  const [commentData, setCommentData] = useState("");
-  const [likes, setLikes] = useState(null);
-  const [likesDisplay, setLikesDisplay] = useState("");
   const [update, setUpdate] = useState(true);
-  const [loadedComment, setLoadedComment] = useState("");
-  const [hasComments, setHasComments] = useState(null);
+  const [commentData, setCommentData] = useState(null);
+  const [likes, setLikes] = useState("");
+  const [likesDisplay, setLikesDisplay] = useState("");
+  const [disableLocal, setDisableLocal] = useState(!props.local);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (update && loadedComment !== props.info.commentID) {
-      setDate(props.info.date);
-      setCommentVal(props.info.commentVal);
-
-      const commenterRef = ref(db, "users/" + props.info.commenter);
-
-      onValue(commenterRef, (snapshot) => {
-        setDisplayName(snapshot.val().displayName);
-
-        RetrieveImg(
-          "profileImages",
-          snapshot.val().uid,
-          snapshot.val().profilePic
-        ).then((val) => {
-          setProfilePic(val);
-        });
-      });
-
-      toggleDeleteBtn();
-
-      setLoadedComment(props.info.commentID);
-      updateData();
-    } else if (update) {
-      updateData();
+    if (update) {
+      getCommentData();
+      setUpdate(false);
     }
-    setUpdate(false);
   }, [update]);
 
   useEffect(() => {
-    console.log(commentData.likes);
-    if (commentData.likes) {
-      setLikes(commentData.likes);
-    } else {
-      setLikes([]);
+    if (commentData === null) {
+      return;
     }
-    console.log(commentData);
+
+    if (profilePic == null) {
+      loadUserData();
+    }
+
+    if (commentVal == null || date == null) {
+      setCommentVal(commentData.commentVal);
+      setDate(commentData.date);
+      setLikes(commentData.likes);
+    }
   }, [commentData]);
 
   useEffect(() => {
-    if (likes === null || likes === [] || !likes.length) {
+    if (likes === "" || !likes || likes === undefined) {
       setLikesDisplay("0 likes");
       return;
-    } else if (likes.length === 1) {
-      setLikesDisplay("1 like");
-    } else {
+    }
+
+    if (likes.length == 0 || likes.length > 1) {
       setLikesDisplay(likes.length + " likes");
+    } else {
+      setLikesDisplay("1 like");
     }
   }, [likes]);
 
-  function updateData() {
-    checkHasComments();
-    if (hasComments) {
-      const commentsRef = ref(db, "posts/" + props.postID + "/comments/");
+  function getCommentData() {
+    setCommentID(props.info.commentID);
+    if (!props.local || disableLocal) {
+      let commentIndex;
+      const commentRef = ref(db, "posts/" + props.postID);
+      onValue(commentRef, (snapshot) => {
+        if (snapshot.val().comments === undefined) {
+          return;
+        }
 
-      onValue(commentsRef, (snapshot) => {
-        const commentsArr = snapshot.val();
+        const arr = snapshot.val().comments;
+        const isCommentByID = (obj) => obj.commentID === props.info.commentID;
+        commentIndex = arr.findIndex(isCommentByID);
 
-        const isComment = (element) =>
-          element.commentID === props.info.commentID;
-        const commentIndex = commentsArr.findIndex(isComment);
-
-        setCommentData(snapshot.val()[commentIndex]);
+        setCommentID(commentIndex);
+        setCommentData(snapshot.val().comments[commentIndex]);
       });
     } else {
-      setCommentData([]);
+      setCommentData(props.info);
+      setLikes(0);
+      setDisableLocal(true);
     }
   }
 
-  function checkHasComments() {
-    const commentRef = ref(db, "posts/" + props.postID);
+  function loadUserData() {
+    const userRef = ref(db, "users/" + commentData.commenter);
 
-    onValue(commentRef, (snapshot) => {
-      if (snapshot.val().comments) {
-        setHasComments(true);
-      } else {
-        setHasComments(false);
-      }
+    onValue(userRef, (snapshot) => {
+      setDisplayName(snapshot.val().displayName);
+
+      RetrieveImg(
+        "profileImages",
+        snapshot.val().uid,
+        snapshot.val().profilePic
+      ).then((val) => {
+        setProfilePic(val);
+      });
     });
+
+    toggleDeleteBtn();
+  }
+
+  function handleLike() {
+    let newLikesArr = [];
+    const currentUserUid = Auth.currentUser.uid;
+    const postRef = ref(db, "posts/" + props.postID + "/comments");
+
+    if (!commentData.likes || commentData.likes[0] === "") {
+      newLikesArr = [currentUserUid];
+    } else if (commentData.likes.includes(currentUserUid)) {
+      newLikesArr = commentData.likes.filter((user) => {
+        return user !== currentUserUid;
+      });
+    } else {
+      let arr = commentData.likes;
+      newLikesArr = arr.concat(currentUserUid);
+    }
+
+    props.updateLikesSort(newLikesArr, commentData.commentID);
+    setLikes(newLikesArr);
+
+    setUpdate(true);
   }
 
   function toggleDeleteBtn() {
-    if (Auth.currentUser.uid === props.info.commenter) {
+    if (Auth.currentUser.uid === commentData.commenter) {
       const deleteIcon = (
         <p className="commentDeleteIcon" onClick={handleDeleteComment}>
           X
@@ -116,26 +137,7 @@ export function ContentComment(props) {
   }
   function handleDeleteComment() {
     setStyleDisplay({ display: "none" });
-    props.deleteComment(props.info.commentID);
-  }
-
-  function handleLike() {
-    let newLikesArr = [];
-    const currentUserUid = Auth.currentUser.uid;
-
-    if (!commentData.likes) {
-      newLikesArr = [currentUserUid];
-    } else if (commentData.likes.includes(currentUserUid)) {
-      newLikesArr = commentData.likes.filter((user) => {
-        return user !== currentUserUid;
-      });
-    } else {
-      let arr = commentData.likes;
-      newLikesArr = arr.concat(currentUserUid);
-    }
-
-    props.updateLikesSort(newLikesArr, props.info.commentID);
-    setUpdate(true);
+    props.deleteComment(commentData.commentID);
   }
 
   function toProfile() {
