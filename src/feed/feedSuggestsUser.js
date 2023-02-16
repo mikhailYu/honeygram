@@ -25,15 +25,18 @@ export function FeedSuggestsUser(props) {
 
   function initUser() {
     if (username == null) {
-      setUsername("@" + props.userInfo.username);
-      setDisplayName(props.userInfo.displayName);
-      RetrieveImg(
-        "profileImages",
-        props.userInfo.uid,
-        props.userInfo.profilePic
-      ).then((val) => {
-        setProfPic(val);
-        setLoaded(true);
+      const userRef = ref(db, "users/" + props.userInfo);
+      onValue(userRef, (snapshot) => {
+        setUsername("@" + snapshot.val().username);
+        setDisplayName(snapshot.val().displayName);
+        RetrieveImg(
+          "profileImages",
+          props.userInfo,
+          snapshot.val().profilePic
+        ).then((val) => {
+          setProfPic(val);
+          setLoaded(true);
+        });
       });
     }
   }
@@ -48,7 +51,7 @@ export function FeedSuggestsUser(props) {
 
       if (!snapshot.val().following) {
         setFollowButton("Follow");
-      } else if (snapshot.val().following.includes(props.userInfo.uid)) {
+      } else if (snapshot.val().following.includes(props.userInfo)) {
         setFollowButton("Unfollow");
       } else {
         setFollowButton("Follow");
@@ -60,7 +63,7 @@ export function FeedSuggestsUser(props) {
     const currentUser = Auth.currentUser;
 
     const userRef = ref(db, "users/" + currentUser.uid);
-    const ownerRef = ref(db, "users/" + props.userInfo.uid);
+    const ownerRef = ref(db, "users/" + props.userInfo);
 
     let newFollowersArr = [];
     let newFollowingArr = [];
@@ -87,14 +90,14 @@ export function FeedSuggestsUser(props) {
       }
 
       if (!snapshot.val().following) {
-        newFollowingArr = [props.userInfo.uid];
-      } else if (snapshot.val().following.includes(props.userInfo.uid)) {
+        newFollowingArr = [props.userInfo];
+      } else if (snapshot.val().following.includes(props.userInfo)) {
         newFollowingArr = snapshot.val().following.filter((user) => {
-          return user !== props.userInfo.uid;
+          return user !== props.userInfo;
         });
       } else {
         let arr = snapshot.val().following;
-        newFollowingArr = arr.concat(props.userInfo.uid);
+        newFollowingArr = arr.concat(props.userInfo);
       }
 
       props.passUpdateFollows(
@@ -108,8 +111,8 @@ export function FeedSuggestsUser(props) {
     });
   }
   function toProfile() {
-    navigate("/profile/" + props.userInfo.uid, {
-      state: { ownerUid: props.userInfo.uid },
+    navigate("/profile/" + props.userInfo, {
+      state: { ownerUid: props.userInfo },
     });
   }
   return (

@@ -3,7 +3,7 @@ import { FeedContent } from "../feed/feedContent";
 import { FeedSuggestions } from "../feed/feedSuggestions";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ref } from "firebase/database";
+import { ref, get } from "firebase/database";
 import { Auth } from "../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { Link } from "react-router-dom";
@@ -16,6 +16,8 @@ import { ContentDesc } from "../contentPage/contentDesc";
 import { useNavigate } from "react-router-dom";
 import uniqid from "uniqid";
 import { FeedSuggestsUser } from "../feed/feedSuggestsUser";
+import { useCallback } from "react";
+import { useMemo } from "react";
 
 export function Feed(props) {
   const [userData, setUserData] = useState(null);
@@ -25,11 +27,13 @@ export function Feed(props) {
   const [update, setUpdate] = useState(false);
   const [suggestsCont, setSuggestsCont] = useState(null);
   const [currentUid, setCurrentUid] = useState(null);
+  const [suggestsMemo, setSuggestsMemo] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(Auth, (user) => {
       if (user) {
         setUpdate(true);
+
         if (currentUid == null) {
           setCurrentUid(user.uid);
         }
@@ -52,30 +56,33 @@ export function Feed(props) {
     if (userUsername === null || userDisplayName === null) {
       setUserUsername("@" + userData.username);
       setUserDisplayName(userData.displayName);
+
       RetrieveImg("profileImages", userData.uid, userData.profilePic).then(
         (val) => {
           setUserProfPic(val);
         }
       );
-
-      if (suggestsCont !== null) {
-        return;
-      } else {
-        setSuggestsCont(
-          <FeedSuggestions
-            passUpdateFollowsMain={passUpdateFollowsMain}
-            currentUserUid={currentUid}
-          />
-        );
-      }
     }
   }, [userData]);
+
+  useMemo(() => {
+    if (currentUid === null) {
+      return;
+    }
+    setSuggestsCont(
+      <FeedSuggestions
+        passUpdateFollowsMain={passUpdateFollowsMain}
+        updateSuggests={updateSuggests}
+        currentUserUid={currentUid}
+      />
+    );
+  }, [suggestsMemo]);
 
   function getUserInfo() {
     const userUid = Auth.currentUser.uid;
     const userRef = ref(db, "users/" + userUid);
-
-    onValue(userRef, (snapshot) => {
+    setSuggestsMemo(userUid);
+    get(userRef).then((snapshot) => {
       setUserData(snapshot.val());
     });
   }
@@ -86,6 +93,10 @@ export function Feed(props) {
     ownerRef
   ) {
     props.updateFollows(newFollowingArr, newFollowersArr, userRef, ownerRef);
+  }
+
+  function updateSuggests(chosenUsers, uid) {
+    props.updateSuggests(chosenUsers, uid);
   }
   return (
     <div className="feedCont">

@@ -22,27 +22,23 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 function App() {
   const [user, setUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  const [passedInfo, setPassedInfo] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    let unsubscribe = onAuthStateChanged(Auth, (user) => {
-      if (user) {
-        setUser(user);
+    let unsubscribe = onAuthStateChanged(Auth, (gotUser) => {
+      if (gotUser && user === null) {
+        setUser(gotUser);
+        updateUserInfo();
 
-        console.log("Currently signed in: " + user.email);
+        console.log("Currently signed in: " + gotUser.email);
       } else {
         console.log("not signed in");
       }
     });
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (user !== null) {
-      updateUserInfo();
-    }
-  }, [user]);
 
   async function getUser() {
     return user;
@@ -57,7 +53,13 @@ function App() {
       const userRef = ref(db, "users/" + user.uid);
 
       onValue(userRef, (snapshot) => {
+        if (!snapshot.val().suggestedUsers) {
+          generateSuggestions();
+        }
         setUserInfo(snapshot.val());
+        if (passedInfo === null) {
+          setPassedInfo(snapshot.val());
+        }
       });
     }
   }
@@ -78,6 +80,53 @@ function App() {
         });
       }
     });
+  }
+
+  function generateSuggestions() {
+    const usersRef = ref(db, "users/");
+    const currentUserUid = Auth.currentUser.uid;
+    let chosenUsers = [];
+    let usersArr = [];
+
+    onValue(usersRef, (snapshot) => {
+      snapshot.forEach((user) => {
+        usersArr.push(user.val());
+      });
+
+      const numOfUsers = usersArr.length;
+
+      for (let safetySwitch = 0; safetySwitch < 20; safetySwitch++) {
+        if (chosenUsers.length >= numOfUsers - 1 || chosenUsers.length >= 5) {
+          handleSuggestsUpdate();
+          break;
+        }
+
+        const randomNum = Math.floor(Math.random() * numOfUsers);
+        if (
+          usersArr[randomNum].uid !== currentUserUid &&
+          !arrayIncludes(usersArr[randomNum].uid)
+        ) {
+          chosenUsers.push(usersArr[randomNum].uid);
+        }
+        console.log("Suggests regened");
+      }
+
+      function arrayIncludes(userUid) {
+        if (chosenUsers.includes(userUid)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    });
+    function handleSuggestsUpdate() {
+      const currentUserRef = ref(db, "users/" + currentUserUid);
+      const suggestedUsers = Object.assign({}, chosenUsers);
+
+      update(currentUserRef, {
+        suggestedUsers: suggestedUsers,
+      });
+    }
   }
 
   async function logout() {
@@ -295,6 +344,7 @@ function App() {
                 updateFollows={updateFollows}
                 getUser={getUser}
                 logout={logout}
+                passedInfo={passedInfo}
               />
             }
           />
