@@ -4,6 +4,7 @@ import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "../firebaseConfig";
 import RetrieveImg from "../general/retrieveImage";
+import { GetProfilePic } from "../general/getProfilePic";
 
 import { ToggleCommentLike } from "../general/postInteractions";
 
@@ -89,11 +90,7 @@ export function ContentComment(props) {
     onValue(userRef, (snapshot) => {
       setDisplayName(snapshot.val().displayName);
 
-      RetrieveImg(
-        "profileImages",
-        snapshot.val().uid,
-        snapshot.val().profilePic
-      ).then((val) => {
+      GetProfilePic(commentData.commenter).then((val) => {
         setProfilePic(val);
       });
     });

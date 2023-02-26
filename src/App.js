@@ -30,16 +30,24 @@ function App() {
     let unsubscribe = onAuthStateChanged(Auth, (gotUser) => {
       if (gotUser && user === null) {
         setUser(gotUser);
-        updateUserInfo();
 
         console.log("Currently signed in: " + gotUser.email);
-      } else {
+      } else if (!gotUser) {
         console.log("not signed in");
       }
     });
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    updateUserInfo();
+  }, [user]);
+
+  useEffect(() => {
+    if (passedInfo === null) {
+      setPassedInfo(userInfo);
+    }
+  }, [userInfo]);
   async function getUser() {
     return user;
   }
@@ -52,14 +60,10 @@ function App() {
     if (user !== null) {
       const userRef = ref(db, "users/" + user.uid);
 
-      onValue(userRef, (snapshot) => {
-        if (!snapshot.val().suggestedUsers) {
-          generateSuggestions();
-        }
+      get(userRef).then((snapshot) => {
+        generateSuggestions();
+        generateFeedPosts();
         setUserInfo(snapshot.val());
-        if (passedInfo === null) {
-          setPassedInfo(snapshot.val());
-        }
       });
     }
   }
@@ -82,6 +86,49 @@ function App() {
     });
   }
 
+  function generateFeedPosts() {
+    const postsRef = ref(db, "posts/");
+    const currentUserUid = Auth.currentUser.uid;
+    const currentUserRef = ref(db, "users/" + currentUserUid);
+    let postsArr = [];
+    let usersUidArr = [];
+    let postFromFollows = [];
+    let fillerPosts = [];
+
+    get(postsRef).then((snapshot) => {
+      snapshot.forEach((post) => {
+        if (post.val().date) {
+          postsArr.unshift(post.val().postID);
+          usersUidArr.unshift(post.val().ownerUid);
+        }
+      });
+
+      get(currentUserRef).then((userSnap) => {
+        for (let i = 0; i < postsArr.length; i++) {
+          if (postFromFollows.length + fillerPosts.length >= 15) {
+            break;
+          }
+
+          if (currentUserUid == usersUidArr[i]) {
+            postFromFollows.push(postsArr[i]);
+          } else if (!userSnap.val().following) {
+            fillerPosts.push(postsArr[i]);
+          } else if (userSnap.val().following.includes(usersUidArr[i])) {
+            postFromFollows.push(postsArr[i]);
+          } else {
+            fillerPosts.push(postsArr[i]);
+          }
+        }
+
+        const finalArr = [...postFromFollows, ...fillerPosts];
+
+        update(currentUserRef, {
+          feedPosts: finalArr,
+        });
+      });
+    });
+  }
+
   function generateSuggestions() {
     const usersRef = ref(db, "users/");
     const currentUserUid = Auth.currentUser.uid;
@@ -97,7 +144,6 @@ function App() {
 
       for (let safetySwitch = 0; safetySwitch < 20; safetySwitch++) {
         if (chosenUsers.length >= numOfUsers - 1 || chosenUsers.length >= 5) {
-          handleSuggestsUpdate();
           break;
         }
 
@@ -108,7 +154,6 @@ function App() {
         ) {
           chosenUsers.push(usersArr[randomNum].uid);
         }
-        console.log("Suggests regened");
       }
 
       function arrayIncludes(userUid) {
@@ -119,6 +164,8 @@ function App() {
         }
       }
     });
+    handleSuggestsUpdate();
+
     function handleSuggestsUpdate() {
       const currentUserRef = ref(db, "users/" + currentUserUid);
       const suggestedUsers = Object.assign({}, chosenUsers);
@@ -132,6 +179,7 @@ function App() {
   async function logout() {
     await signOut(Auth);
     setUser(null);
+    setPassedInfo(null);
     navigate("/login");
   }
 
@@ -141,32 +189,64 @@ function App() {
     gender,
     bio,
     profilePicName,
-    imageUpload
+    imageUpload,
+    imageChanged,
+    chosenDefaultPic
   ) {
-    const imageRef = sRef(
-      Storage,
-      "profileImages/" + user.uid + "/" + profilePicName
-    );
+    if (imageChanged) {
+      const imageRef = sRef(
+        Storage,
+        "profileImages/" + user.uid + "/" + profilePicName
+      );
 
-    uploadBytes(imageRef, imageUpload)
-      .then(() => {
-        console.log("Image Sent");
-        update(ref(db, "users/" + user.uid), {
-          displayName: displayName,
-          email: user.email,
-          username: username,
-          profilePic: profilePicName,
-          gender: gender,
-          bio: bio,
-        }).then(() => {
-          const userUid = user.uid;
-          updateUserInfo();
-          navigate("/profile/" + userUid, { state: { ownerUid: userUid } });
+      uploadBytes(imageRef, imageUpload)
+        .then(() => {
+          console.log("Image Sent");
+          update(ref(db, "users/" + user.uid), {
+            displayName: displayName,
+            email: user.email,
+            username: username,
+            profilePic: profilePicName,
+            gender: gender,
+            bio: bio,
+            defaultPic: null,
+          }).then(() => {
+            const userUid = user.uid;
+            updateUserInfo();
+            navigate("/profile/" + userUid, { state: { ownerUid: userUid } });
+          });
+        })
+        .catch((err) => {
+          console.log(err);
         });
-      })
-      .catch((err) => {
-        console.log(err);
+    } else if (chosenDefaultPic == null) {
+      update(ref(db, "users/" + user.uid), {
+        displayName: displayName,
+        email: user.email,
+        username: username,
+        gender: gender,
+        bio: bio,
+        defaultPic: null,
+      }).then(() => {
+        const userUid = user.uid;
+        updateUserInfo();
+        navigate("/profile/" + userUid, { state: { ownerUid: userUid } });
       });
+    } else {
+      update(ref(db, "users/" + user.uid), {
+        displayName: displayName,
+        email: user.email,
+        username: username,
+        gender: gender,
+        bio: bio,
+        profilePic: null,
+        defaultPic: chosenDefaultPic,
+      }).then(() => {
+        const userUid = user.uid;
+        updateUserInfo();
+        navigate("/profile/" + userUid, { state: { ownerUid: userUid } });
+      });
+    }
   }
 
   function uploadPost(image, desc) {
@@ -345,6 +425,8 @@ function App() {
                 getUser={getUser}
                 logout={logout}
                 passedInfo={passedInfo}
+                updateCommentLikes={updateCommentLikes}
+                postComment={postComment}
               />
             }
           />

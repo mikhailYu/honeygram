@@ -8,6 +8,7 @@ import RetrieveImg from "../general/retrieveImage";
 import { ref, update, get } from "firebase/database";
 import { db, Auth } from "../firebaseConfig";
 import uniqid from "uniqid";
+import { GetProfilePic } from "../general/getProfilePic";
 
 export function ProfilePage(props) {
   const location = useLocation();
@@ -46,10 +47,10 @@ export function ProfilePage(props) {
   useEffect(() => {
     if (owner !== null && owner.uid !== loadedOwner) {
       setLoadedOwner(owner.uid);
-      setUsername(owner.username);
+      setUsername("@" + owner.username);
       setDisplayName(owner.displayName);
       setBio(owner.bio);
-      getProfilePic(owner.profilePic);
+      initProfilePic();
       setUpStats();
       loadPosts();
       toggleUpperButtons();
@@ -124,12 +125,10 @@ export function ProfilePage(props) {
     }
   }
 
-  function getProfilePic(picName) {
-    if (owner !== null) {
-      RetrieveImg("profileImages", owner.uid, picName).then((val) => {
-        setProfilePic(val);
-      });
-    }
+  function initProfilePic() {
+    GetProfilePic(owner.uid).then((val) => {
+      setProfilePic(val);
+    });
   }
 
   function toggleUpperButtons() {
@@ -231,7 +230,7 @@ export function ProfilePage(props) {
           </div>
           <div className="profileDescCont">
             <div className="profileDescTitles">
-              <p>{"@" + username}</p>
+              <p>{username}</p>
               <p>{displayName}</p>
             </div>
             <p className="profileDescText">{bio}</p>

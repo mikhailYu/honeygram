@@ -1,10 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { db, Auth } from "../firebaseConfig";
-import { onValue } from "firebase/database";
 import "../styles/Content.css";
-import RetrieveImg from "../general/retrieveImage";
 import { ref, update, get } from "firebase/database";
 import { useNavigate } from "react-router-dom";
+import { GetProfilePic } from "../general/getProfilePic";
 
 export function FeedSuggestsUser(props) {
   const navigate = useNavigate();
@@ -14,6 +13,7 @@ export function FeedSuggestsUser(props) {
   const [profPic, setProfPic] = useState(null);
   const [followButton, setFollowButton] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [openForUpdate, setOpenForUpdate] = useState(true);
 
   useEffect(() => {
     if (reUpdate && !loaded) {
@@ -23,17 +23,22 @@ export function FeedSuggestsUser(props) {
     }
   }, [reUpdate]);
 
+  useEffect(() => {
+    const userRef = ref(db, "users/" + props.userInfo);
+    get(userRef).then((snapshot) => {
+      if (openForUpdate) {
+        getFollowers();
+      }
+    });
+  }, [openForUpdate]);
+
   function initUser() {
     if (username == null) {
       const userRef = ref(db, "users/" + props.userInfo);
-      onValue(userRef, (snapshot) => {
+      get(userRef).then((snapshot) => {
         setUsername("@" + snapshot.val().username);
         setDisplayName(snapshot.val().displayName);
-        RetrieveImg(
-          "profileImages",
-          props.userInfo,
-          snapshot.val().profilePic
-        ).then((val) => {
+        GetProfilePic(snapshot.val().uid).then((val) => {
           setProfPic(val);
           setLoaded(true);
         });
@@ -45,16 +50,20 @@ export function FeedSuggestsUser(props) {
     const currentUser = Auth.currentUser;
     const userRef = ref(db, "users/" + currentUser.uid);
 
-    onValue(userRef, (snapshot) => {
-      const currentUser = Auth.currentUser;
-      const userRef = ref(db, "users/" + currentUser.uid);
+    get(userRef).then((snapshot) => {
+      const followingArr = snapshot.val().following;
 
-      if (!snapshot.val().following) {
-        setFollowButton("Follow");
-      } else if (snapshot.val().following.includes(props.userInfo)) {
-        setFollowButton("Unfollow");
-      } else {
-        setFollowButton("Follow");
+      if (openForUpdate) {
+        if (!followingArr) {
+          setOpenForUpdate(false);
+          setFollowButton("Follow");
+        } else if (followingArr.includes(props.userInfo)) {
+          setOpenForUpdate(false);
+          setFollowButton("Unfollow");
+        } else {
+          setOpenForUpdate(false);
+          setFollowButton("Follow");
+        }
       }
     });
   }
@@ -106,7 +115,7 @@ export function FeedSuggestsUser(props) {
         userRef,
         ownerRef
       );
-
+      setOpenForUpdate(true);
       setReUpdate(true);
     });
   }

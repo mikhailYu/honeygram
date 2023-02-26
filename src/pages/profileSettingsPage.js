@@ -16,8 +16,15 @@ export function ProfileSettings(props) {
   const [imageUpload, setImageUpload] = useState(null);
   const [customPicDisplay, setCustomPicDisplay] = useState(null);
   const [profilePicName, setProfilePicName] = useState(null);
+  const [imageChanged, setImageChanged] = useState(false);
+  const [disableConfirm, setDisableConfirm] = useState(true);
+  const [defaultPics, setDefaultPics] = useState(null);
+  const [chosenDefaultPic, setChosenDefaultPic] = useState(null);
 
   useEffect(() => {
+    if (defaultPics === null) {
+      initDefaultPics();
+    }
     props.getUserInfo().then((val) => {
       if (val !== null) {
         setUserInfo(val);
@@ -26,7 +33,8 @@ export function ProfileSettings(props) {
         setGenderInput(val.gender);
         setBioInput(val.bio);
         setUserUid(val.uid);
-        getCustomPic(val.profilePic, val.uid);
+        getPic(val.profilePic, val.uid, val.defaultPic);
+        setDisableConfirm(false);
       }
     });
   }, [props.userInfo]);
@@ -37,13 +45,44 @@ export function ProfileSettings(props) {
     });
   }, [imageUpload]);
 
-  function getCustomPic(profilePic, uid) {
-    if (profilePic !== null) {
-      setProfilePicName(profilePic);
-      RetrieveImg("profileImages", uid, profilePic).then((val) => {
-        setCustomPicDisplay(val);
-      });
+  function initDefaultPics() {
+    let pics = [];
+    for (let i = 1; i < 8; i++) {
+      let newPic = (
+        <div
+          key={uniqid()}
+          className="profileDefaultPic"
+          onClick={() => {
+            handleDefaultProfilePic(i);
+          }}
+          style={{
+            backgroundImage:
+              "url(" +
+              require("../images/defaultProfileIcons/defaultIcon_0" +
+                i +
+                ".jpg") +
+              ")",
+          }}
+        ></div>
+      );
+      pics.push(newPic);
     }
+    setDefaultPics(pics);
+  }
+
+  function getPic(profilePic, uid, defaultPic) {
+    if (profilePic == null || !profilePic) {
+      if (defaultPic == null || !defaultPic) {
+        return;
+      } else {
+        setChosenDefaultPic(defaultPic);
+      }
+      return;
+    }
+    setProfilePicName(profilePic);
+    RetrieveImg("profileImages", uid, profilePic).then((val) => {
+      setCustomPicDisplay(val);
+    });
   }
 
   function updateCustomPic() {
@@ -69,17 +108,42 @@ export function ProfileSettings(props) {
     }
     const imageName = uniqid();
     setProfilePicName(imageName);
+    setImageChanged(true);
   }
 
   function confirmSettings() {
+    let defaultPic;
+    if (!displayNameInput || !genderInput || !bioInput) {
+      alert("Please fill in all of the info");
+      return;
+    }
+
+    if (disableConfirm) {
+      return;
+    }
+
+    if (!profilePicName && chosenDefaultPic === null) {
+      defaultPic = 1;
+    } else {
+      defaultPic = chosenDefaultPic;
+    }
+
+    setDisableConfirm(true);
+
     props.overWriteProfileSettings(
       usernameInput,
       displayNameInput,
       genderInput,
       bioInput,
       profilePicName,
-      imageUpload
+      imageUpload,
+      imageChanged,
+      defaultPic
     );
+  }
+
+  function handleDefaultProfilePic(picNum) {
+    setChosenDefaultPic(picNum);
   }
 
   return (
@@ -120,13 +184,8 @@ export function ProfileSettings(props) {
           </div>
           <div className="settingsInputBox">
             <div className="settingsPicChooseCont">
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
-              <ProfileDefaultPic />
+              {defaultPics}
+
               <input
                 className="inputProfilePic"
                 type="file"
@@ -136,6 +195,7 @@ export function ProfileSettings(props) {
                 onChange={(event) => {
                   setImageUpload(event.target.files[0]);
                   event.target.value = null;
+                  setChosenDefaultPic(null);
                 }}
               />
               <button

@@ -28,7 +28,7 @@ export function FeedSuggestions(props) {
 
   function checkIfHasSuggestions() {
     const currentUserRef = ref(db, "users/" + props.currentUserUid);
-    onValue(currentUserRef, (snapshot) => {
+    get(currentUserRef).then((snapshot) => {
       if (snapshot.val().suggestedUsers) {
         displayUserSuggests();
       }
@@ -38,7 +38,7 @@ export function FeedSuggestions(props) {
     const userRef = ref(db, "users/" + props.currentUserUid);
     const generatedArr = [];
 
-    onValue(userRef, (snapshot) => {
+    get(userRef).then((snapshot) => {
       const usersArr = snapshot.val().suggestedUsers;
       const followers = snapshot.val().followers;
       const newSuggest = usersArr.map((user) => {

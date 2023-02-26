@@ -128,7 +128,7 @@
   border-radius: 50px;
   overflow: hidden;
   border: 1px solid rgb(163, 163, 163);
-
+  flex-grow: auto;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -136,6 +136,9 @@
 
 .contentCommentText {
   width: 80%;
+  max-width: 80%;
+
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: flex-start;
 }

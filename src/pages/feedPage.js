@@ -4,20 +4,12 @@ import { FeedSuggestions } from "../feed/feedSuggestions";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { ref, get } from "firebase/database";
-import { Auth } from "../firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
-import { Link } from "react-router-dom";
 import { db } from "../firebaseConfig";
-import { onValue } from "firebase/database";
-import { ContentComment } from "../contentPage/contentComment";
 import "../styles/Content.css";
-import RetrieveImg from "../general/retrieveImage";
-import { ContentDesc } from "../contentPage/contentDesc";
+import { Auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import uniqid from "uniqid";
-import { FeedSuggestsUser } from "../feed/feedSuggestsUser";
-import { useCallback } from "react";
-import { useMemo } from "react";
+import { GetProfilePic } from "../general/getProfilePic";
 
 export function Feed(props) {
   const [userData, setUserData] = useState(null);
@@ -26,26 +18,24 @@ export function Feed(props) {
   const [userProfPic, setUserProfPic] = useState(null);
   const [update, setUpdate] = useState(false);
   const [suggestsCont, setSuggestsCont] = useState(null);
-  const [currentUid, setCurrentUid] = useState(null);
-  const [suggestsMemo, setSuggestsMemo] = useState(false);
+
+  const [feedContentArr, setFeedContentArr] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    onAuthStateChanged(Auth, (user) => {
-      if (user) {
-        setUpdate(true);
+    if (props.passedInfo === null) {
+      return;
+    }
 
-        if (currentUid == null) {
-          setCurrentUid(user.uid);
-        }
-        console.log("Got user");
-      }
-    });
-  }, []);
+    setUpdate(true);
+  }, [props.passedInfo]);
 
   useEffect(() => {
     if (update) {
-      getUserInfo();
+      setUserData(props.passedInfo);
       setUpdate(false);
+      initFeedContent();
     }
   }, [update]);
 
@@ -57,35 +47,47 @@ export function Feed(props) {
       setUserUsername("@" + userData.username);
       setUserDisplayName(userData.displayName);
 
-      RetrieveImg("profileImages", userData.uid, userData.profilePic).then(
-        (val) => {
-          setUserProfPic(val);
-        }
-      );
+      GetProfilePic(userData.uid).then((val) => {
+        setUserProfPic(val);
+      });
     }
-  }, [userData]);
 
-  useMemo(() => {
-    if (currentUid === null) {
-      return;
-    }
     setSuggestsCont(
       <FeedSuggestions
         passUpdateFollowsMain={passUpdateFollowsMain}
         updateSuggests={updateSuggests}
-        currentUserUid={currentUid}
+        currentUserUid={props.passedInfo.uid}
       />
     );
-  }, [suggestsMemo]);
+  }, [userData]);
 
-  function getUserInfo() {
-    const userUid = Auth.currentUser.uid;
-    const userRef = ref(db, "users/" + userUid);
-    setSuggestsMemo(userUid);
+  function initFeedContent() {
+    const currentUserUid = props.passedInfo.uid;
+    const userRef = ref(db, "users/" + currentUserUid);
+    let postsArr;
     get(userRef).then((snapshot) => {
-      setUserData(snapshot.val());
+      postsArr = snapshot.val().feedPosts.map((postID) => {
+        return (
+          <FeedContent
+            passCommentLikes={passCommentLikes}
+            passPostComment={passPostComment}
+            key={uniqid()}
+            postID={postID}
+          />
+        );
+      });
+      setFeedContentArr(postsArr);
     });
   }
+
+  function passCommentLikes(postID, likesArr, index) {
+    props.updateCommentLikes(postID, likesArr, index);
+  }
+
+  function passPostComment(postID, commentInput, newCommentID) {
+    props.postComment(postID, commentInput, newCommentID);
+  }
+
   function passUpdateFollowsMain(
     newFollowingArr,
     newFollowersArr,
@@ -98,20 +100,27 @@ export function Feed(props) {
   function updateSuggests(chosenUsers, uid) {
     props.updateSuggests(chosenUsers, uid);
   }
+
+  function goToProfile() {
+    navigate("/profile/" + props.passedInfo.uid, {
+      state: { ownerUid: props.passedInfo.uid },
+    });
+  }
   return (
     <div className="feedCont">
       <div className="feedLPad"></div>
       <div className="feedPostsCont">
         <div className="feedProfileHeaderCont">
           <div
+            onClick={goToProfile}
             className="feedProfileHeaderUserPic"
             style={{
               backgroundImage: "url(" + userProfPic + ")",
             }}
           ></div>
           <div className="feedProfileHeaderUserNames">
-            <p>{userUsername}</p>
-            <p>{userDisplayName}</p>
+            <p onClick={goToProfile}>{userUsername}</p>
+            <p onClick={goToProfile}>{userDisplayName}</p>
           </div>
           <div className="feedProfileHeaderGap"></div>
           <div
@@ -122,8 +131,8 @@ export function Feed(props) {
             Log Out
           </div>
         </div>
-        <FeedContent />
-        <FeedContent />
+
+        {feedContentArr}
       </div>
 
       {suggestsCont}

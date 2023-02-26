@@ -1,48 +1,341 @@
+import { ref, update, get, onValue } from "firebase/database";
+import { Auth } from "../firebaseConfig";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { db } from "../firebaseConfig";
 import { FeedContentComment } from "./feedContentComment";
+import RetrieveImg from "../general/retrieveImage";
+import { TogglePostLike } from "../general/postInteractions";
+import { GetProfilePic } from "../general/getProfilePic";
+import uniqid from "uniqid";
 
-export function FeedContent() {
+export function FeedContent(props) {
+  const [isUpdate, setIsUpdate] = useState(true);
+  const [postData, setPostData] = useState(null);
+  const [displayName, setDisplayName] = useState(null);
+  const [date, setDate] = useState(null);
+  const [profilePic, setProfilePic] = useState(null);
+  const [ownerUid, setOwnerUid] = useState(null);
+  const [postImg, setPostImg] = useState(null);
+  const [updateLikes, setUpdateLikes] = useState(true);
+  const [likes, setLikes] = useState(null);
+  const [likesDisplay, setLikesDisplay] = useState(null);
+  const [postDesc, setpostDesc] = useState(null);
+  const [commentInput, setCommentInput] = useState("");
+  const [commentsArr, setCommentsArr] = useState([]);
+  const [followBtn, setFollowBtn] = useState("");
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isUpdate) {
+      updatePostData();
+
+      setIsUpdate(false);
+    }
+  }, [isUpdate]);
+
+  useEffect(() => {
+    if (postData == null) {
+      return;
+    }
+    const userRef = ref(db, "users/" + postData.ownerUid);
+
+    setOwnerUid(postData.ownerUid);
+    get(userRef).then((snapshot) => {
+      getLikes();
+
+      if (displayName === null) {
+        loadComments();
+
+        setDisplayName(snapshot.val().displayName);
+        GetProfilePic(snapshot.val().uid).then((val) => {
+          setProfilePic(val);
+        });
+
+        RetrieveImg("postImages", postData.ownerUid, props.postID).then(
+          (val) => {
+            setPostImg(val);
+          }
+        );
+
+        const desc = (
+          <div className="feedContentDescCont">
+            <p>{snapshot.val().displayName} </p> <p>{postData.postDesc}</p>
+          </div>
+        );
+        setpostDesc(desc);
+      }
+    });
+
+    setDate(postData.date);
+    toggleFollow();
+  }, [postData]);
+
+  useEffect(() => {
+    if (commentsArr === [] || commentsArr === null) {
+      setCommentsArr("No comments");
+    }
+  }, [commentsArr]);
+
+  useEffect(() => {
+    if (likes === null) {
+      setLikesDisplay("0 likes");
+    } else if (likes.length === 1) {
+      setLikesDisplay("1 like");
+    } else {
+      setLikesDisplay(likes.length + " likes");
+    }
+  }, [likes]);
+
+  function getLikes() {
+    const postRef = ref(db, "posts/" + props.postID);
+
+    get(postRef).then((snapshot) => {
+      if (!updateLikes) {
+        return;
+      }
+      if (!snapshot.val().likes) {
+        setLikes([]);
+        setUpdateLikes(false);
+        return;
+      }
+
+      setLikes(snapshot.val().likes);
+      setUpdateLikes(false);
+    });
+  }
+
+  function loadComments() {
+    const postRef = ref(db, "posts/" + props.postID);
+
+    get(postRef).then((snapshot) => {
+      if (!snapshot.val().comments) {
+        setCommentsArr(null);
+
+        return;
+      }
+
+      let commentsArr = snapshot.val().comments.map((info) => {
+        return (
+          <FeedContentComment
+            key={uniqid()}
+            info={info}
+            postID={postData.postID}
+            updateLikesSort={updateLikesSort}
+          />
+        );
+      });
+
+      setCommentsArr(commentsArr);
+    });
+  }
+
+  function updateLikesSort(likesArr, targetID) {
+    const isID = (comment) => comment.commentID === targetID;
+    const commentsArr = getUpdatedCommentsArr();
+    const index = commentsArr.findIndex(isID);
+
+    props.passCommentLikes(postData.postID, likesArr, index);
+  }
+
+  function getUpdatedCommentsArr() {
+    const postRef = ref(db, "posts/" + postData.postID);
+    let returnVal = "";
+
+    onValue(postRef, (snapshot) => {
+      returnVal = snapshot.val().comments;
+    });
+    return returnVal;
+  }
+
+  function updatePostData() {
+    const postRef = ref(db, "posts/" + props.postID);
+
+    onValue(postRef, (snapshot) => {
+      setPostData(snapshot.val());
+    });
+  }
+
+  function handleLike() {
+    TogglePostLike(postData, postData.postID);
+    setUpdateLikes(true);
+    setIsUpdate(true);
+  }
+
+  function goToProfile() {
+    if (ownerUid == null) {
+      return;
+    }
+    navigate("/profile/" + ownerUid, {
+      state: { ownerUid: ownerUid },
+    });
+  }
+
+  function goToPost() {
+    if (props.postID == null) {
+      return;
+    }
+    navigate("/post/" + props.postID);
+  }
+
+  function handlePostComment() {
+    if (commentInput === "") {
+      alert("Please input a comment");
+      return;
+    }
+    const uid = Auth.currentUser.uid;
+    const newCommentID = uniqid();
+    let newCommentInfo = {
+      commentID: newCommentID,
+      commentVal: commentInput,
+      commenter: uid,
+      date: "Now",
+    };
+
+    props.passPostComment(postData.postID, commentInput, newCommentID);
+
+    setIsUpdate(true);
+    postLocally(newCommentInfo);
+    setCommentInput("");
+  }
+
+  function postLocally(newCommentInfo) {
+    let newComment = (
+      <FeedContentComment
+        key={uniqid()}
+        local={true}
+        info={newCommentInfo}
+        postID={postData.postID}
+        updateLikesSort={updateLikesSort}
+      />
+    );
+
+    if (commentsArr) {
+      setCommentsArr([newComment, ...commentsArr]);
+    } else {
+      setCommentsArr([newComment]);
+    }
+  }
+
+  function toggleFollow() {
+    const userUid = Auth.currentUser.uid;
+    const userRef = ref(db, "users/" + userUid);
+    get(userRef).then((snapshot) => {
+      checkIsFollow(snapshot.val()).then((val) =>
+        setFollowBtn(
+          <button className="profilePageFollowBtn" onClick={handleFollow}>
+            {val}
+          </button>
+        )
+      );
+    });
+  }
+
+  async function checkIsFollow(snapshot) {
+    if (snapshot.uid == postData.ownerUid) {
+      return;
+    } else if (!snapshot.following) {
+      return "Follow";
+    } else if (snapshot.following.includes(postData.ownerUid)) {
+      return "Unfollow";
+    } else if (snapshot.uid === postData.ownerUid) {
+      return;
+    } else {
+      return "Follow";
+    }
+  }
+
+  function handleFollow() {
+    const currentUser = Auth.currentUser;
+
+    const userRef = ref(db, "users/" + currentUser.uid);
+    const ownerRef = ref(db, "users/" + postData.ownerUid);
+
+    let newFollowersArr = [];
+    let newFollowingArr = [];
+    get(ownerRef).then((ownerSnap) => {
+      let owner = ownerSnap.val();
+      get(userRef).then((snapshot) => {
+        if (!owner.followers) {
+          newFollowersArr = [currentUser.uid];
+        } else if (owner.followers.includes(currentUser.uid)) {
+          newFollowersArr = owner.followers.filter((user) => {
+            return user !== currentUser.uid;
+          });
+        } else {
+          let arr = owner.followers;
+
+          newFollowersArr = arr.concat(currentUser.uid);
+        }
+
+        if (!snapshot.val().following) {
+          newFollowingArr = [owner.uid];
+        } else if (snapshot.val().following.includes(owner.uid)) {
+          newFollowingArr = snapshot.val().following.filter((user) => {
+            return user !== owner.uid;
+          });
+        } else {
+          let arr = snapshot.val().following;
+          newFollowingArr = arr.concat(owner.uid);
+        }
+
+        update(ownerRef, {
+          followers: newFollowersArr,
+        });
+        update(userRef, {
+          following: newFollowingArr,
+        }).then(() => {
+          toggleFollow();
+        });
+      });
+    });
+  }
   return (
     <div className="feedContentCont">
       <div className="feedContentUpperCont">
         <div
+          onClick={goToProfile}
           className="feedContentUpperProfPic"
           style={{
-            backgroundImage:
-              "url(" + require("../images/testImages/testPolar.jpg") + ")",
+            backgroundImage: "url(" + profilePic + ")",
           }}
         ></div>
         <div>
-          <p>Test User</p>
+          <p onClick={goToProfile}>{displayName}</p>
         </div>
+        {followBtn}
       </div>
       <div
+        onClick={goToPost}
         className="feedContentPic"
         style={{
-          backgroundImage:
-            "url(" + require("../images/testImages/testPolar.jpg") + ")",
+          backgroundImage: "url(" + postImg + ")",
         }}
       ></div>
       <div className="feedContentIconsCont">
-        <p>🧡</p>
+        <p onClick={handleLike}>🧡</p>
 
         <div></div>
       </div>
       <div className="feedContentLikesCont">
-        <p>20 likes</p>
+        <p>{likesDisplay}</p>
       </div>
-      <div className="feedContentDescCont">
-        <p>Test User</p>
-        <p>Me waving at you #whatsup</p>
-      </div>
-      <div className="feedContentCommentsCont">
-        <FeedContentComment />
-        <FeedContentComment />
-        <p>See 11 more comments.</p>
-      </div>
-      <p className="feedContentDate">21-10-2022</p>
+      {postDesc}
+      <div className="feedContentCommentsCont">{commentsArr}</div>
+      <p className="feedContentDate">{date}</p>
       <div className="feedContentAddCommentCont">
-        <input type="text" placeholder="Add a comment" />
-        <button type="button">Post</button>
+        <input
+          id="feedCommentInputPost"
+          type="text"
+          placeholder="Add a comment"
+          value={commentInput}
+          onChange={(e) => {
+            setCommentInput(e.target.value);
+          }}
+        />
+        <button type="button" onClick={handlePostComment}>
+          Post
+        </button>
       </div>
     </div>
   );

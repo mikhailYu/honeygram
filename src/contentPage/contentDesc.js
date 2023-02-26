@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GetProfilePic } from "../general/getProfilePic";
 
 export function ContentDesc(props) {
   const navigate = useNavigate();
@@ -9,7 +10,10 @@ export function ContentDesc(props) {
 
   useEffect(() => {
     setDisplayName(props.ownerName);
-    setProfilePic(props.profilePic);
+
+    GetProfilePic(props.ownerUid).then((val) => {
+      setProfilePic(val);
+    });
     setDesc(props.desc);
   }, []);
 

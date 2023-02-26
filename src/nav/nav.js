@@ -12,13 +12,9 @@ export function Nav(props) {
       <Link state={{ ownerUid: user.uid }} to="/">
         Home
       </Link>
-      <Link to="/signUp">Sign Up</Link>
-      <Link to="/login">login</Link>
+
       <Link to="/newPost">New Post</Link>
-      <Link to="/profile" state={{ ownerUid: "" }}>
-        profile
-      </Link>
-      <Link to="post/:ID">content</Link>
+
       <Link to="/settings">settings</Link>
       <Link to="/about">about</Link>
       <p
@@ -28,19 +24,6 @@ export function Nav(props) {
       >
         Log Out
       </p>
-
-      <Link
-        to="/profile/lAZOOpDUDjOnsObvfU8KCKQNAJG2"
-        state={{ ownerUid: "lAZOOpDUDjOnsObvfU8KCKQNAJG2" }}
-      >
-        Polar Profile
-      </Link>
-      <Link
-        to="/profile/9I8HAunuS6UKrgUuEmhcjrrhnhQ2"
-        state={{ ownerUid: "9I8HAunuS6UKrgUuEmhcjrrhnhQ2" }}
-      >
-        Grizzly Profile
-      </Link>
     </nav>
   );
 }

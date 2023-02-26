@@ -1,5 +1,6 @@
 .signUpPageCont,
-.signUpBox {
+.signUpBox,
+#signUpForm {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -18,14 +19,16 @@
   min-height: 200px;
 
   border-radius: 5px;
-  flex-wrap: nowrap;
-  gap: 20px;
 
   background-color: gray;
   border: 1px solid lightgray;
 }
+#signUpForm {
+  flex-wrap: nowrap;
+  gap: 20px;
+}
 
-.signUpBox > input {
+#signUpForm > input {
   border: 1px solid gray;
   background-color: white;
   border-radius: 5px;

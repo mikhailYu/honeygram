@@ -9,6 +9,7 @@ export default function CreatePostPage(props) {
   const [previewImage, setPreviewImage] = useState(null);
   const [removePreviewBtn, setRemovePreviewBtn] = useState(null);
   const [imageUpload, setImageUpload] = useState(null);
+  const [disableConfirm, setDisableConfirm] = useState(true);
 
   useEffect(() => {
     if (postPreviewActive) {
@@ -52,6 +53,7 @@ export default function CreatePostPage(props) {
     if (image !== null) {
       setPreviewImage(URL.createObjectURL(image));
       setImageUpload(image);
+      setDisableConfirm(false);
       setPostPreviewActive(!postPreviewActive);
     }
   }
@@ -64,10 +66,16 @@ export default function CreatePostPage(props) {
   function handleNewPost() {
     if (previewImage == null) {
       alert("Please upload an image");
+      return;
     } else if (descInput.length < 1) {
       alert("Please enter a description");
       return;
     }
+    if (disableConfirm) {
+      return;
+    }
+
+    setDisableConfirm(true);
     props.uploadPost(imageUpload, descInput);
   }
 

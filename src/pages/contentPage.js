@@ -10,6 +10,7 @@ import RetrieveImg from "../general/retrieveImage";
 import { ContentDesc } from "../contentPage/contentDesc";
 import { useNavigate } from "react-router-dom";
 import uniqid from "uniqid";
+import { GetProfilePic } from "../general/getProfilePic";
 import { TogglePostLike } from "../general/postInteractions";
 
 export function Content(props) {
@@ -65,21 +66,21 @@ export function Content(props) {
         setPostImg(val);
       });
 
-      RetrieveImg("profileImages", owner.uid, owner.profilePic).then((val) => {
+      GetProfilePic(owner.uid).then((val) => {
         setProfilePic(val);
-        setContentDesc(
-          <ContentDesc
-            profilePic={val}
-            ownerName={owner.displayName}
-            ownerUid={owner.uid}
-            desc={postInfo.postDesc}
-          />
-        );
       });
 
       if (postInfo.date) {
         setDate(postInfo.date);
       }
+      setContentDesc(
+        <ContentDesc
+          key={uniqid()}
+          ownerName={owner.displayName}
+          desc={postInfo.postDesc}
+          ownerUid={owner.uid}
+        />
+      );
       getLikes();
     } else if (owner !== null) {
       getLikes();
