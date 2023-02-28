@@ -1,21 +1,22 @@
 {
   "files": {
-    "main.css": "/honeygram/static/css/main.4f296eb4.css",
-    "main.js": "/honeygram/static/js/main.8aabd16e.js",
+    "main.css": "/honeygram/static/css/main.859d0c87.css",
+    "main.js": "/honeygram/static/js/main.d5282f54.js",
+    "static/media/defaultIcon_06.png": "/honeygram/static/media/defaultIcon_06.449b75e27af8f7f14c08.png",
+    "static/media/defaultIcon_04.png": "/honeygram/static/media/defaultIcon_04.b0b8fc98d22459a8c5ba.png",
+    "static/media/defaultIcon_03.png": "/honeygram/static/media/defaultIcon_03.24b03315c04771e374a9.png",
+    "static/media/honeyGramLoginSplash.png": "/honeygram/static/media/honeyGramLoginSplash.e17b0c6ace6753790edf.png",
+    "static/media/defaultIcon_05.png": "/honeygram/static/media/defaultIcon_05.f22843d547873ee183d1.png",
+    "static/media/defaultIcon_01.png": "/honeygram/static/media/defaultIcon_01.437f932a90fa4dfc86c0.png",
+    "static/media/defaultIcon_02.png": "/honeygram/static/media/defaultIcon_02.46915ea93dffb6a624d2.png",
+    "static/media/defaultIcon_07.png": "/honeygram/static/media/defaultIcon_07.7af5d10735ae6ecb39a2.png",
     "static/media/testPolar.jpg": "/honeygram/static/media/testPolar.e482af805acecf0625a4.jpg",
-    "static/media/defaultIcon_04.jpg": "/honeygram/static/media/defaultIcon_04.6a2bd8f3f0b2c6c993f3.jpg",
-    "static/media/defaultIcon_03.jpg": "/honeygram/static/media/defaultIcon_03.f3028442646019028e7d.jpg",
-    "static/media/defaultIcon_06.jpg": "/honeygram/static/media/defaultIcon_06.963f09aabcd28576d107.jpg",
-    "static/media/defaultIcon_05.jpg": "/honeygram/static/media/defaultIcon_05.abc5a1627899e40212d3.jpg",
-    "static/media/defaultIcon_01.jpg": "/honeygram/static/media/defaultIcon_01.b24043c48040248ab3ec.jpg",
-    "static/media/defaultIcon_07.jpg": "/honeygram/static/media/defaultIcon_07.9126bcc924b991c8c9e5.jpg",
-    "static/media/defaultIcon_02.jpg": "/honeygram/static/media/defaultIcon_02.fbc91586a1f1c4236248.jpg",
     "index.html": "/honeygram/index.html",
-    "main.4f296eb4.css.map": "/honeygram/static/css/main.4f296eb4.css.map",
-    "main.8aabd16e.js.map": "/honeygram/static/js/main.8aabd16e.js.map"
+    "main.859d0c87.css.map": "/honeygram/static/css/main.859d0c87.css.map",
+    "main.d5282f54.js.map": "/honeygram/static/js/main.d5282f54.js.map"
   },
   "entrypoints": [
-    "static/css/main.4f296eb4.css",
-    "static/js/main.8aabd16e.js"
+    "static/css/main.859d0c87.css",
+    "static/js/main.d5282f54.js"
   ]
 }
