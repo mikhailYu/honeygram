@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/honeygram/static/css/main.4855796b.css",
-    "main.js": "/honeygram/static/js/main.fb779abf.js",
+    "main.css": "/honeygram/static/css/main.9ae32833.css",
+    "main.js": "/honeygram/static/js/main.7a2ef5c8.js",
     "static/media/defaultIcon_06.png": "/honeygram/static/media/defaultIcon_06.449b75e27af8f7f14c08.png",
     "static/media/defaultIcon_04.png": "/honeygram/static/media/defaultIcon_04.b0b8fc98d22459a8c5ba.png",
     "static/media/defaultIcon_03.png": "/honeygram/static/media/defaultIcon_03.24b03315c04771e374a9.png",
@@ -13,12 +13,13 @@
     "static/media/testPolar.jpg": "/honeygram/static/media/testPolar.e482af805acecf0625a4.jpg",
     "static/media/likeIcon_active.png": "/honeygram/static/media/likeIcon_active.6ee0e7d76aa836a82f94.png",
     "static/media/likeIcon_inactive.png": "/honeygram/static/media/likeIcon_inactive.597148f0cdc3f96ff591.png",
+    "static/media/honeyGramLogo.png": "/honeygram/static/media/honeyGramLogo.afef892b7e58187a5c04.png",
     "index.html": "/honeygram/index.html",
-    "main.4855796b.css.map": "/honeygram/static/css/main.4855796b.css.map",
-    "main.fb779abf.js.map": "/honeygram/static/js/main.fb779abf.js.map"
+    "main.9ae32833.css.map": "/honeygram/static/css/main.9ae32833.css.map",
+    "main.7a2ef5c8.js.map": "/honeygram/static/js/main.7a2ef5c8.js.map"
   },
   "entrypoints": [
-    "static/css/main.4855796b.css",
-    "static/js/main.fb779abf.js"
+    "static/css/main.9ae32833.css",
+    "static/js/main.7a2ef5c8.js"
   ]
 }
