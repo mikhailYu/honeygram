@@ -36,6 +36,9 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
+    if (location.pathname === "/") {
+      navigate("/login");
+    }
     if (location.pathname === "/signUp") {
       setEnableSignup(true);
     } else {
@@ -468,6 +471,7 @@ function App() {
               />
             }
           />
+
           <Route
             path="/login"
             element={<LoginPage login={login} logout={logout} />}

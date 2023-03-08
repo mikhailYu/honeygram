@@ -17,17 +17,3 @@ export const app = initializeApp(firebaseConfig);
 export const Auth = getAuth(app);
 export const Storage = getStorage();
 export const db = getDatabase();
-
-onValue(ref(db, "users/"), (snapshot) => {
-  if (snapshot.val() == null) {
-    set(ref(db), {
-      users: {
-        sampleUser: {
-          uid: "123456",
-          displayName: "Test User",
-          profilePic: "test.jpg",
-        },
-      },
-    });
-  }
-});

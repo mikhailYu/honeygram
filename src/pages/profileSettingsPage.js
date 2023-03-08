@@ -1,8 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { Storage } from "../firebaseConfig";
+
 import "../styles/settings.css";
-import { ProfileDefaultPic } from "../profile/profileDefaultPics";
+
 import RetrieveImg from "../general/retrieveImage";
 import uniqid from "uniqid";
 export function ProfileSettings(props) {
