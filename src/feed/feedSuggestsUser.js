@@ -36,6 +36,9 @@ export function FeedSuggestsUser(props) {
     if (username == null) {
       const userRef = ref(db, "users/" + props.userInfo);
       get(userRef).then((snapshot) => {
+        if (!snapshot.val()) {
+          return;
+        }
         setUsername("@" + snapshot.val().username);
         setDisplayName(snapshot.val().displayName);
         GetProfilePic(snapshot.val().uid).then((val) => {
@@ -136,7 +139,7 @@ export function FeedSuggestsUser(props) {
 
       <div className="feedSuggestsNamesCont">
         <p onClick={toProfile}>{displayName}</p>
-        <p onClick={toProfile}>{username}</p>
+        <p>{username}</p>
       </div>
 
       <button

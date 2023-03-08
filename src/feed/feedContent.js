@@ -24,6 +24,7 @@ export function FeedContent(props) {
   const [commentInput, setCommentInput] = useState("");
   const [commentsArr, setCommentsArr] = useState([]);
   const [followBtn, setFollowBtn] = useState("");
+  const [heartIcon, setHeartIcon] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -60,7 +61,16 @@ export function FeedContent(props) {
 
         const desc = (
           <div className="feedContentDescCont">
-            <p>{snapshot.val().displayName} </p> <p>{postData.postDesc}</p>
+            <p
+              onClick={() => {
+                navigate("/profile/" + snapshot.val().uid, {
+                  state: { ownerUid: snapshot.val().uid },
+                });
+              }}
+            >
+              {snapshot.val().displayName}{" "}
+            </p>
+            <p>{postData.postDesc}</p>
           </div>
         );
         setpostDesc(desc);
@@ -79,10 +89,13 @@ export function FeedContent(props) {
 
   useEffect(() => {
     if (likes === null) {
+      heartInactive();
       setLikesDisplay("0 likes");
     } else if (likes.length === 1) {
+      handleHeartActive();
       setLikesDisplay("1 like");
     } else {
+      handleHeartActive();
       setLikesDisplay(likes.length + " likes");
     }
   }, [likes]);
@@ -102,6 +115,15 @@ export function FeedContent(props) {
 
       setLikes(snapshot.val().likes);
       setUpdateLikes(false);
+    });
+  }
+
+  function goToProfile() {
+    if (ownerUid == null) {
+      return;
+    }
+    navigate("/profile/" + ownerUid, {
+      state: { ownerUid: ownerUid },
     });
   }
 
@@ -162,13 +184,24 @@ export function FeedContent(props) {
     setIsUpdate(true);
   }
 
-  function goToProfile() {
-    if (ownerUid == null) {
+  function handleHeartActive() {
+    if (!postData.likes) {
+      heartInactive();
       return;
     }
-    navigate("/profile/" + ownerUid, {
-      state: { ownerUid: ownerUid },
-    });
+    if (postData.likes.includes(Auth.currentUser.uid)) {
+      heartActive();
+    } else {
+      heartInactive();
+    }
+  }
+
+  function heartActive() {
+    setHeartIcon(require("../images/assets/likeIcon_active.png"));
+  }
+
+  function heartInactive() {
+    setHeartIcon(require("../images/assets/likeIcon_inactive.png"));
   }
 
   function goToPost() {
@@ -312,18 +345,24 @@ export function FeedContent(props) {
           backgroundImage: "url(" + postImg + ")",
         }}
       ></div>
-      <div className="feedContentIconsCont">
-        <p onClick={handleLike}>🧡</p>
-
-        <div></div>
-      </div>
-      <div className="feedContentLikesCont">
-        <p>{likesDisplay}</p>
+      <div className="feedContentLikesImgDisplay">
+        <div className="feedContentIconsCont">
+          <p
+            className="feedContentHeart interactiveButton"
+            style={{
+              backgroundImage: "url(" + heartIcon + ")",
+            }}
+            onClick={handleLike}
+          ></p>
+        </div>
+        <div className="feedContentLikesCont">
+          <p>{likesDisplay}</p>
+        </div>
       </div>
       {postDesc}
       <div className="feedContentCommentsCont">{commentsArr}</div>
       <p className="feedContentDate">{date}</p>
-      <div className="feedContentAddCommentCont">
+      <form className="feedContentAddCommentCont">
         <input
           id="feedCommentInputPost"
           type="text"
@@ -333,10 +372,10 @@ export function FeedContent(props) {
             setCommentInput(e.target.value);
           }}
         />
-        <button type="button" onClick={handlePostComment}>
+        <button type="submit" onClick={handlePostComment}>
           Post
         </button>
-      </div>
+      </form>
     </div>
   );
 }

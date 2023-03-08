@@ -40,7 +40,16 @@ export function ProfilePreviewPic(props) {
   useEffect(() => {
     if (hover) {
       const stats = (
-        <div className="previewStats">
+        <div
+          className="previewStats"
+          onClick={handleClick}
+          onMouseOver={() => {
+            setHover(true);
+          }}
+          onMouseLeave={() => {
+            setHover(false);
+          }}
+        >
           <p>{likeCount}</p>
           <p>{commentCount}</p>
         </div>
@@ -57,20 +66,22 @@ export function ProfilePreviewPic(props) {
   }
 
   return (
-    <div
-      className="profilePrevPic"
-      style={{
-        backgroundImage: "url(" + previewImage + ")",
-      }}
-      onClick={handleClick}
-      onMouseOver={() => {
-        setHover(true);
-      }}
-      onMouseLeave={() => {
-        setHover(false);
-      }}
-    >
-      {postStatsDisplay}
+    <div className="profilePrevPic">
+      <div
+        onClick={handleClick}
+        onMouseOver={() => {
+          setHover(true);
+        }}
+        onMouseLeave={() => {
+          setHover(false);
+        }}
+        style={{
+          backgroundImage: "url(" + previewImage + ")",
+        }}
+        className="profilePrevPicImg"
+      >
+        {postStatsDisplay}
+      </div>
     </div>
   );
 }

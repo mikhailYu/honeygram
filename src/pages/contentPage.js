@@ -29,6 +29,7 @@ export function Content(props) {
   const [loadedOwner, setLoadedOwner] = useState("");
   const [likesDisplay, setLikesDisplay] = useState("");
   const [likesCount, setLikesCount] = useState(null);
+  const [heartIcon, setHeartIcon] = useState(null);
 
   useEffect(() => {
     if (update) {
@@ -137,13 +138,14 @@ export function Content(props) {
     if (Auth.currentUser.uid === owner.uid) {
       const deleteIcon = (
         <p
-          className="contentDeleteIcon"
+          style={{
+            backgroundImage: "url(" + require("../images/assets/bin.png") + ")",
+          }}
+          className="contentDeleteIcon interactiveButton"
           onClick={() => {
             props.deletePost(postInfo, true);
           }}
-        >
-          X
-        </p>
+        ></p>
       );
       setDeleteIcon(deleteIcon);
     } else {
@@ -195,11 +197,29 @@ export function Content(props) {
   function getLikes() {
     if (!postInfo.likes || postInfo.likes[0] === "") {
       setLikesCount(0);
+      heartInactive();
       return;
     }
 
     const likeCount = postInfo.likes.length;
+    handleHeartActive();
     setLikesCount(likeCount);
+  }
+
+  function handleHeartActive() {
+    if (postInfo.likes.includes(Auth.currentUser.uid)) {
+      heartActive();
+    } else {
+      heartInactive();
+    }
+  }
+
+  function heartActive() {
+    setHeartIcon(require("../images/assets/likeIcon_active.png"));
+  }
+
+  function heartInactive() {
+    setHeartIcon(require("../images/assets/likeIcon_inactive.png"));
   }
 
   function handleLikePost() {
@@ -235,47 +255,59 @@ export function Content(props) {
 
   return (
     <div className="contentPageCont">
-      <div
-        className="contentPageImg"
-        style={{
-          backgroundImage: "url(" + postImg + ")",
-        }}
-      ></div>
-      <div className="contentPageSideCont">
-        <div className="contentPageSideTopCont">
-          <div
-            className="contentPageUserPic"
-            onClick={toProfile}
-            style={{
-              backgroundImage: "url(" + profilePic + ")",
-            }}
-          ></div>
-          <p onClick={toProfile}> {ownerUsername}</p>
-          <div></div>
-          {deleteIcon}
-        </div>
-        <div className="contentPageCommentSection">
-          {contentDesc}
-          {commentSection}
-        </div>
-        <div className="contentPageBottomCont">
-          <div className="contentPageIconsCont">
-            <p onClick={handleLikePost}>🧡</p>
-          </div>
-          <p>{likesDisplay}</p>
-          <p>{date}</p>
-          <div className="contentPageAddCommentCont">
-            <input
-              type="text"
-              placeholder="Add a comment"
-              id="commentInputPost"
-              onChange={(e) => {
-                setCommentInput(e.target.value);
+      <div className="contentPageBox">
+        <div
+          className="contentPageImg"
+          style={{
+            backgroundImage: "url(" + postImg + ")",
+          }}
+        ></div>
+        <div className="contentPageSideCont">
+          <div className="contentPageSideTopCont">
+            <div
+              className="contentPageUserPic"
+              onClick={toProfile}
+              style={{
+                backgroundImage: "url(" + profilePic + ")",
               }}
-            />
-            <button type="button" onClick={handlePostComment}>
-              Post
-            </button>
+            ></div>
+            <p className="contentPageName" onClick={toProfile}>
+              {ownerUsername}
+            </p>
+            <div className="contentPageNamePadding"></div>
+            {deleteIcon}
+          </div>
+          <div className="contentPageCommentSection">
+            {contentDesc}
+            {commentSection}
+          </div>
+
+          <div className="contentPageBottomCont">
+            <div className="contentPageIconsCont">
+              <div className="contentPageLikeCont">
+                <img
+                  className="contentPageLikeIcon interactiveButton"
+                  onClick={handleLikePost}
+                  src={heartIcon}
+                ></img>
+                <p>{likesDisplay}</p>
+              </div>
+              <p className="contentPageDate">{date}</p>
+            </div>
+
+            <form className="contentPageAddCommentCont">
+              <input
+                type="text"
+                placeholder="Add a comment"
+                id="commentInputPost"
+                onChange={(e) => {
+                  setCommentInput(e.target.value);
+                }}
+              />
+              <button type="submit" onClick={handlePostComment}>
+                Post
+              </button>
+            </form>
           </div>
         </div>
       </div>

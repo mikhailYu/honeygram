@@ -3,19 +3,17 @@ import { ref, get, onValue, val } from "firebase/database";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "../firebaseConfig";
-import RetrieveImg from "../general/retrieveImage";
 
 export function FeedContentComment(props) {
   const [commentID, setCommentID] = useState("");
-  const [profilePic, setProfilePic] = useState(null);
   const [displayName, setDisplayName] = useState(null);
   const [commentVal, setCommentVal] = useState(null);
-  const [deleteIcon, setDeleteIcon] = useState(null);
-  const [styleDisplay, setStyleDisplay] = useState({ display: "flex" });
+
   const [update, setUpdate] = useState(true);
   const [commentData, setCommentData] = useState(null);
   const [likes, setLikes] = useState("");
   const [likesDisplay, setLikesDisplay] = useState("");
+  const [heartIcon, setHeartIcon] = useState(null);
 
   const navigate = useNavigate();
 
@@ -40,18 +38,19 @@ export function FeedContentComment(props) {
 
       setLikes(commentData.likes);
     }
+    handleHeartActive();
   }, [commentData]);
 
   useEffect(() => {
     if (likes === "" || !likes || likes === undefined) {
-      setLikesDisplay("0 likes");
+      setLikesDisplay("0");
       return;
     }
 
     if (likes.length == 0 || likes.length > 1) {
-      setLikesDisplay(likes.length + " likes");
+      setLikesDisplay(likes.length);
     } else {
-      setLikesDisplay("1 like");
+      setLikesDisplay("1");
     }
   }, [likes]);
 
@@ -104,6 +103,26 @@ export function FeedContentComment(props) {
     setUpdate(true);
   }
 
+  function handleHeartActive() {
+    if (!commentData.likes) {
+      heartInactive();
+      return;
+    }
+    if (commentData.likes.includes(Auth.currentUser.uid)) {
+      heartActive();
+    } else {
+      heartInactive();
+    }
+  }
+
+  function heartActive() {
+    setHeartIcon(require("../images/assets/likeIcon_active.png"));
+  }
+
+  function heartInactive() {
+    setHeartIcon(require("../images/assets/likeIcon_inactive.png"));
+  }
+
   function toProfile() {
     navigate("/profile/" + props.info.commenter, {
       state: { ownerUid: props.info.commenter },
@@ -112,14 +131,22 @@ export function FeedContentComment(props) {
   return (
     <div className="feedContentComment">
       <div className="feedContentCommentTop">
-        <p onClick={toProfile}>{displayName}</p>
+        <p className="feedContentCommentName" onClick={toProfile}>
+          {displayName}
+        </p>
         <div className="feedContentCommentLikes">
-          <p onClick={handleLike}>🧡</p>
-          <p>{likesDisplay}</p>
+          <p className="feedContentCommentLikesDisplay">{likesDisplay}</p>
+          <p
+            className="feedContentCommentHeart interactiveButton"
+            style={{
+              backgroundImage: "url(" + heartIcon + ")",
+            }}
+            onClick={handleLike}
+          ></p>
         </div>
       </div>
 
-      <p>{commentVal}</p>
+      <p className="feedContentCommentVal">{commentVal}</p>
     </div>
   );
 }

@@ -39,6 +39,10 @@ export function FeedSuggestions(props) {
     const generatedArr = [];
 
     get(userRef).then((snapshot) => {
+      if (!snapshot.val().suggestedUsers) {
+        console.log("hi");
+        return;
+      }
       const usersArr = snapshot.val().suggestedUsers;
       const followers = snapshot.val().followers;
       const newSuggest = usersArr.map((user) => {

@@ -15,23 +15,11 @@ export function LoginPage(props) {
     signOut(Auth);
   }, []);
 
-  async function login() {
-    try {
-      await signInWithEmailAndPassword(Auth, loginEmail, loginPassword).then(
-        () => {
-          navigate("/");
-        }
-      );
-    } catch (error) {
-      alert("Incorrect login details");
-    }
-  }
-
   return (
     <div className="loginPageCont">
+      <div className="loginSplashImg"></div>
       <div className="loginBox">
         <div className="loginInfoCont">
-          <div className="loginPadding"></div>
           <form id="loginForm">
             <input
               placeholder="Email"
@@ -47,14 +35,21 @@ export function LoginPage(props) {
                 setLoginPassword(event.target.value);
               }}
             />
-            <button type="submit" onClick={login}>
+            <button
+              type="submit"
+              onClick={() => {
+                props.login(loginEmail, loginPassword);
+              }}
+            >
               Login
             </button>
           </form>
         </div>
         <div className="loginSignUpCont">
           <p>Not a member?</p>
-          <Link to="/signUp">Sign Up Here</Link>
+          <Link className="loginSignUpLink" to="/signUp">
+            SIGN UP HERE
+          </Link>
         </div>
       </div>
     </div>

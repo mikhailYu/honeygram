@@ -12,12 +12,12 @@
   align-items: flex-start;
   height: 100%;
   max-width: 100%;
-
+  gap: 10px;
   overflow-x: hidden;
 }
 
 .feedLPad {
-  width: 25%;
+  flex-grow: 1;
   height: 100%;
 }
 
@@ -47,7 +47,8 @@
 .feedContentCommentsCont,
 .feedContentAddCommentCont,
 .feedContentCommentTop,
-.feedContentCommentLikes {
+.feedContentCommentLikes,
+.feedContentLikesImgDisplay {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -79,33 +80,51 @@
   height: 50%;
   padding-left: 10px;
   overflow: hidden;
+  font-size: 1rem;
+  font-weight: bold;
+}
+.feedContentUpperCont > div:nth-child(2) :hover {
+  cursor: pointer;
+  color: var(--mainBorderColour);
+}
+.profilePageFollowBtn {
+  cursor: pointer;
 }
 .feedContentUpperProfPic {
   width: 40px;
   height: 40px;
   border-radius: 50px;
   overflow: hidden;
-  border: 1px solid rgb(163, 163, 163);
-
+  background-color: var(--backgroundGray);
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
 }
+.feedContentUpperProfPic:hover {
+  cursor: pointer;
+  border: 2px solid var(--mainBorderColour);
+}
 
 .feedContentPic {
   min-height: 500px;
-
+  cursor: pointer;
   width: 100%;
-
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-
   background-color: black;
-  background-repeat: no-repeat;
-  background-position: center;
-  /* if x > y then this, else reverse */
-  background-size: 100% auto;
+  background-size: contain;
+}
+.feedContentPic:hover {
+  filter: brightness(1.1);
+}
+
+.feedContentLikesImgDisplay {
+  width: 100%;
+  flex-direction: row;
+
+  justify-content: flex-start;
+  padding-left: 20px;
 }
 
 .feedContentIconsCont {
@@ -113,15 +132,17 @@
   flex-wrap: nowrap;
 
   justify-content: flex-start;
-  width: 90%;
 }
 
-.feedContentIconsCont > div {
-  width: 65%;
-}
-
-.feedContentLikesCont {
-  width: 90%;
+.feedContentHeart {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  transition: all 30ms ease-in-out;
+  margin-right: 10px;
 }
 
 .feedContentDescCont {
@@ -130,6 +151,14 @@
   align-items: flex-start;
   flex-direction: column;
   flex-wrap: nowrap;
+  gap: 5px;
+}
+.feedContentDescCont > p:nth-child(1) {
+  font-weight: bold;
+}
+.feedContentDescCont > p:nth-child(1):hover {
+  color: var(--mainBorderColour);
+  cursor: pointer;
 }
 
 .feedContentCommentsCont::-webkit-scrollbar {
@@ -152,7 +181,7 @@
   justify-content: flex-start;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 5px;
 }
 
 .feedContentCommentTop {
@@ -166,10 +195,23 @@
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  flex-wrap: wrap;
+  width: 10%;
+  justify-content: flex-end;
+  gap: 5px;
+  color: var(--subTextColour);
+}
+.feedContentCommentName {
+  font-weight: bold;
+}
+.feedContentCommentName:hover {
+  cursor: pointer;
+  color: var(--mainBorderColour);
 }
 
 .feedContentDate {
   width: 90%;
+  color: var(--subTextColour);
 }
 
 .feedContentAddCommentCont {
@@ -185,7 +227,11 @@
   padding-left: 10px;
 
   width: 85%;
-  height: 100%;
+  height: 90%;
+  border-radius: 5px;
+}
+.feedContentAddCommentCont > input:focus {
+  border: 2px solid var(--mainBorderColour);
 }
 
 .feedContentAddCommentCont > button {
@@ -193,6 +239,20 @@
 
   height: 100%;
   padding: 0px 10px 0px 10px;
+}
+.feedContentAddCommentCont > button:hover {
+  cursor: pointer;
+  color: var(--mainBorderColour);
+}
+
+.feedContentCommentHeart {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  transition: all 30ms ease-in-out;
 }
 
 /* feed profile header */
@@ -209,9 +269,12 @@
 
 .feedProfileHeaderCont {
   min-height: 60px;
-  border: 1px solid gray;
+  border: 1px solid var(--lightBlueGray);
+  border-radius: 5px;
   width: 90%;
   flex-direction: row;
+  padding-left: 20px;
+  padding-right: 20px;
   flex-wrap: nowrap;
   gap: 10px;
 }
@@ -221,17 +284,32 @@
   height: 50px;
   overflow: hidden;
   border-radius: 50px;
-
+  background-color: var(--backgroundGray);
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
 }
 
 .feedProfileHeaderUserNames {
-  font-size: 0.9em;
+  font-size: 0.9rem;
+}
+.feedProfileHeaderUserNames > p:nth-child(2) {
+  font-weight: bold;
 }
 .feedProfileHeaderGap {
-  width: 25%;
+  flex-grow: 1;
+}
+.feedProfileHeaderUserNames > p:nth-child(1):hover {
+  color: var(--mainBorderColour);
+  cursor: pointer;
+}
+.feedProfileHeaderUserPic:hover {
+  border: 2px solid var(--mainBorderColour);
+  cursor: pointer;
+}
+.feedProfileHeaderLogoutBtn:hover {
+  color: var(--mainBorderColour);
+  cursor: pointer;
 }
 
 /* suggestions */
@@ -250,9 +328,9 @@
 
 .feedSuggestsCont {
   padding: 10px;
-  gap: 10px;
+  gap: 30px;
   width: 20%;
-
+  margin-top: 10px;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start;
@@ -285,20 +363,35 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  background-color: var(--backgroundGray);
+}
+.feedSuggestsUserImg:hover {
+  border: 2px solid var(--mainBorderColour);
+  cursor: pointer;
 }
 
 .feedSuggestsNamesCont {
   flex-direction: column;
   justify-content: flex-start;
-  width: fit-content;
-
+  align-items: flex-start;
+  overflow: hidden;
   flex-grow: 1;
 }
 
-.feedSuggestsNamesCont > p {
-  width: 100%;
+.feedSuggestsNamesCont > p:nth-child(1) {
+  font-weight: bold;
+}
+.feedSuggestsNamesCont > p:nth-child(1):hover {
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--mainBorderColour);
 }
 
 .feedSuggestsButton {
-  width: 20%;
+  min-width: 25%;
+}
+
+.feedSuggestsButton:hover {
+  color: var(--mainBorderColour);
+  cursor: pointer;
 }

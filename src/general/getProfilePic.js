@@ -11,7 +11,7 @@ export async function GetProfilePic(userUid) {
   if (snapshot.val().defaultPic) {
     returnImg = require("../images/defaultProfileIcons/defaultIcon_0" +
       snapshot.val().defaultPic +
-      ".jpg");
+      ".png");
 
     return returnImg;
   } else {

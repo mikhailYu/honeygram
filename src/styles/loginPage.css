@@ -1,7 +1,9 @@
 .loginPageCont,
 .loginBox,
 .loginInfoCont,
-#loginForm {
+#loginForm,
+.loginSignUpCont,
+.loginSplashImg {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -12,41 +14,97 @@
 .loginPageCont {
   width: 100%;
   height: 100%;
+  gap: 100px;
+  flex-wrap: nowrap;
+  flex-direction: row;
+
+  padding-right: 300px;
+}
+
+.loginSplashImg {
+  width: 500px;
+  height: 800px;
+
+  border-radius: 10px;
+
+  background-image: url(../images/assets/honeyGramLoginSplash.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .loginBox {
-  width: 300px;
+  width: 350px;
   height: 400px;
-  min-height: 400px;
-
   border-radius: 5px;
   flex-wrap: nowrap;
-  gap: 30px;
+  gap: 10px;
 }
 
 .loginInfoCont {
-  background-color: gray;
-  border: 1px solid lightgray;
-  border-radius: 5px;
+  border: 1px solid var(--mainBorderColour);
+  border-radius: 10px;
+  width: 100%;
+  height: 70%;
+}
+.loginSignUpCont {
   width: 100%;
   height: 30%;
 }
 
-.loginPadding {
-  height: 10%;
-}
-
 #loginForm {
-  gap: 10px;
+  gap: 30px;
   flex-wrap: nowrap;
+  height: 100%;
+  padding-top: 10%;
 }
 
 #loginForm > input {
   background-color: white;
   border: 1px solid lightgray;
+  height: 40px;
+  font-size: 1.2rem;
+  width: 90%;
   border-radius: 5px;
+  padding: 0px 20px 0px 20px;
+  transition: all 50ms ease-in-out;
+}
+
+#loginForm > input:focus {
+  border: 2px solid var(--mainBorderColour);
+  transform: scale(1.02);
 }
 
 #loginForm > button {
-  height: 20%;
+  height: 15%;
+  width: 30%;
+  font-size: 1.2rem;
+  color: white;
+  border-radius: 5px;
+  background-color: var(--mainButtonColour);
+  transition: all 20ms ease-in-out;
+}
+
+#loginForm > button:hover {
+  font-weight: bold;
+  filter: brightness(1.1);
+  cursor: pointer;
+  transform: scale(1.02);
+}
+
+.loginSignUpCont > p {
+  font-size: 1rem;
+}
+
+.loginSignUpLink {
+  font-size: 1.2rem;
+
+  color: var(--mainButtonColour);
+  transition: all 50ms ease-in-out;
+}
+
+.loginSignUpLink:hover {
+  filter: brightness(2);
+  cursor: pointer;
+  font-weight: bold;
 }

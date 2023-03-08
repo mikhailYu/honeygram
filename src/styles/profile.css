@@ -8,7 +8,9 @@
 .profileDescTitles,
 .profileDescText,
 .profileContentCont,
-.profilePrevPic {
+.profilePrevPic,
+.profilePageFollowBtn,
+.previewStats {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -19,7 +21,7 @@
 .profileCont {
   width: 100%;
   height: 100%;
-
+  flex-wrap: nowrap;
   justify-content: flex-start;
 }
 
@@ -27,12 +29,15 @@
 
 .profileInfoCont {
   flex-direction: row;
-  height: 35%;
+  min-height: 300px;
   width: 60%;
 }
 .profileInfoPicCont {
   width: 40%;
   height: 100%;
+}
+.profilePageFollowBtn:hover {
+  color: var(--mainBorderColour);
 }
 
 .profileInfoPic {
@@ -41,24 +46,34 @@
   background-size: cover;
 
   border-radius: 500px;
-
+  background-color: var(--lightBlueGray);
   width: 150px;
   height: 150px;
 }
 
 .profileTextCont {
+  padding-top: 20px;
   width: 60%;
   height: 100%;
 }
 
 .profileNameCont {
   height: 10%;
-  width: 100%;
+  width: 70%;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 17px;
 }
 
 .profileStatsCont {
   height: 10%;
-  width: 100%;
+  width: 80%;
+  padding-top: 10px;
+
+  flex-direction: row;
+  justify-content: space-between;
+
+  font-size: 20px;
 }
 
 .profileDescCont {
@@ -72,9 +87,15 @@
   width: 100%;
 }
 
+.profileDescTitles > p {
+  font-size: 17px;
+  font-weight: bold;
+}
+
 .profileDescText {
   align-items: flex-start;
   justify-content: flex-start;
+  font-size: 17px;
   height: 70%;
   width: 100%;
 }
@@ -89,15 +110,14 @@
   flex-direction: row;
 
   width: 60%;
-  height: 65%;
+  flex-grow: 1;
 }
-
+.noPosts {
+  width: 100%;
+  text-align: center;
+}
 .profilePrevPic {
   background-color: rgb(224, 224, 224);
-
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
 
   color: rgb(255, 255, 255);
   font-size: 2rem;
@@ -105,4 +125,23 @@
   text-align: center;
   width: 300px;
   height: 300px;
+  font-weight: lighter;
+  border-radius: 5px;
+}
+
+.profilePrevPicImg {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.previewStats {
+  background-color: rgba(0, 0, 0, 0.247);
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  text-align: center;
 }

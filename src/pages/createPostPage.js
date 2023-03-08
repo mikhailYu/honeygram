@@ -9,7 +9,8 @@ export default function CreatePostPage(props) {
   const [previewImage, setPreviewImage] = useState(null);
   const [removePreviewBtn, setRemovePreviewBtn] = useState(null);
   const [imageUpload, setImageUpload] = useState(null);
-  const [disableConfirm, setDisableConfirm] = useState(true);
+  const [disableConfirm, setDisableConfirm] = useState(false);
+  const [cursorStyle, setCursorStyle] = useState("pointer");
 
   useEffect(() => {
     if (postPreviewActive) {
@@ -20,16 +21,15 @@ export default function CreatePostPage(props) {
       );
 
       const removeBtn = (
-        <button
-          className="removePreviewPost"
+        <img
+          className="removePreviewPost interactiveButton"
           onClick={() => {
             setPostPreviewActive(false);
             setPreviewImage(null);
             setImageUpload(null);
           }}
-        >
-          Remove
-        </button>
+          src={require("../images/assets/bin.png")}
+        ></img>
       );
       setRemovePreviewBtn(removeBtn);
       setPostPreview(newPreviewDiv);
@@ -41,7 +41,7 @@ export default function CreatePostPage(props) {
             document.getElementById("newPostInput").click();
           }}
         >
-          <p>+ Upload an image</p>
+          <img src={require("../images/assets/addPhotoIcon.png")}></img>
         </button>
       );
       setRemovePreviewBtn(null);
@@ -101,7 +101,18 @@ export default function CreatePostPage(props) {
       ></textarea>
       <div className="createPostDescLength">{descLength}</div>
 
-      <button className="createPostSubmitBtn" onClick={handleNewPost}>
+      <button
+        style={{ cursor: cursorStyle }}
+        onMouseOver={() => {
+          if (disableConfirm) {
+            setCursorStyle("wait");
+          } else {
+            setCursorStyle("pointer");
+          }
+        }}
+        className="createPostSubmitBtn interactiveButton"
+        onClick={handleNewPost}
+      >
         Create new post
       </button>
     </div>

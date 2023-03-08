@@ -3,10 +3,7 @@ import { ref, get, onValue, val } from "firebase/database";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "../firebaseConfig";
-import RetrieveImg from "../general/retrieveImage";
 import { GetProfilePic } from "../general/getProfilePic";
-
-import { ToggleCommentLike } from "../general/postInteractions";
 
 export function ContentComment(props) {
   const [commentID, setCommentID] = useState("");
@@ -21,6 +18,7 @@ export function ContentComment(props) {
   const [likes, setLikes] = useState("");
   const [likesDisplay, setLikesDisplay] = useState("");
   const [disableLocal, setDisableLocal] = useState(!props.local);
+  const [heartIcon, setHeartIcon] = useState(null);
 
   const navigate = useNavigate();
 
@@ -32,7 +30,7 @@ export function ContentComment(props) {
   }, [update]);
 
   useEffect(() => {
-    if (commentData === null) {
+    if (commentData === null || !commentData) {
       return;
     }
 
@@ -45,14 +43,16 @@ export function ContentComment(props) {
       setDate(commentData.date);
       setLikes(commentData.likes);
     }
+    handleHeartActive();
   }, [commentData]);
 
   useEffect(() => {
     if (likes === "" || !likes || likes === undefined) {
+      heartInactive();
       setLikesDisplay("0 likes");
       return;
     }
-
+    handleHeartActive();
     if (likes.length == 0 || likes.length > 1) {
       setLikesDisplay(likes.length + " likes");
     } else {
@@ -120,12 +120,36 @@ export function ContentComment(props) {
     setUpdate(true);
   }
 
+  function handleHeartActive() {
+    if (!commentData.likes) {
+      heartInactive();
+      return;
+    }
+    if (commentData.likes.includes(Auth.currentUser.uid)) {
+      heartActive();
+    } else {
+      heartInactive();
+    }
+  }
+
+  function heartActive() {
+    setHeartIcon(require("../images/assets/likeIcon_active.png"));
+  }
+
+  function heartInactive() {
+    setHeartIcon(require("../images/assets/likeIcon_inactive.png"));
+  }
+
   function toggleDeleteBtn() {
     if (Auth.currentUser.uid === commentData.commenter) {
       const deleteIcon = (
-        <p className="commentDeleteIcon" onClick={handleDeleteComment}>
-          X
-        </p>
+        <p
+          style={{
+            backgroundImage: "url(" + require("../images/assets/bin.png") + ")",
+          }}
+          className="commentDeleteIcon interactiveButton"
+          onClick={handleDeleteComment}
+        ></p>
       );
       setDeleteIcon(deleteIcon);
     } else {
@@ -154,16 +178,23 @@ export function ContentComment(props) {
       ></div>
       <div className="contentCommentText">
         <div className="contentCommentTop">
-          <p onClick={toProfile}>{displayName}</p>
-          <p>{commentVal}</p>
+          <p className="contentCommentDisplayName" onClick={toProfile}>
+            {displayName}
+          </p>
+          <p className="contentCommentVal">{commentVal}</p>
         </div>
         <div className="contentCommentBottom">
-          <p>{date}</p>
+          <p className="contentCommentDate">{date}</p>
           <p>{likesDisplay}</p>
-          {deleteIcon}
         </div>
       </div>
-      <p onClick={handleLike}>🧡</p>
+      {deleteIcon}
+      <div className="contentCommentMidPadding"></div>
+      <img
+        onClick={handleLike}
+        src={heartIcon}
+        className="contentCommentHeart interactiveButton"
+      ></img>
     </div>
   );
 }

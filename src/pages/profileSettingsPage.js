@@ -9,6 +9,7 @@ export function ProfileSettings(props) {
   const [bioLength, setBioLength] = useState("0/150");
   const [userInfo, setUserInfo] = useState(null);
   const [usernameInput, setUsernameInput] = useState("");
+  const [usernameDisplay, setUsernameDisplay] = useState("");
   const [displayNameInput, setDisplayNameInput] = useState("");
   const [genderInput, setGenderInput] = useState("");
   const [bioInput, setBioInput] = useState("");
@@ -18,8 +19,10 @@ export function ProfileSettings(props) {
   const [profilePicName, setProfilePicName] = useState(null);
   const [imageChanged, setImageChanged] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(true);
+  const [cursorStyle, setCursorStyle] = useState("pointer");
   const [defaultPics, setDefaultPics] = useState(null);
   const [chosenDefaultPic, setChosenDefaultPic] = useState(null);
+  const [existingDefault, setExistingDefault] = useState(null);
 
   useEffect(() => {
     if (defaultPics === null) {
@@ -40,10 +43,25 @@ export function ProfileSettings(props) {
   }, [props.userInfo]);
 
   useEffect(() => {
+    if (!usernameInput) {
+      return;
+    }
+    setUsernameDisplay("@" + usernameInput);
+  }, [usernameInput]);
+
+  useEffect(() => {
     handleImageUpload().then(() => {
       updateCustomPic();
     });
   }, [imageUpload]);
+
+  useEffect(() => {
+    if (existingDefault) {
+      document.querySelector(".defaultPic" + existingDefault).style.border =
+        "3px solid var(--mainBorderColour)";
+      resetDefaultStyles(existingDefault);
+    }
+  }, [defaultPics]);
 
   function initDefaultPics() {
     let pics = [];
@@ -51,7 +69,7 @@ export function ProfileSettings(props) {
       let newPic = (
         <div
           key={uniqid()}
-          className="profileDefaultPic"
+          className={"profileDefaultPic defaultPic" + i}
           onClick={() => {
             handleDefaultProfilePic(i);
           }}
@@ -60,7 +78,7 @@ export function ProfileSettings(props) {
               "url(" +
               require("../images/defaultProfileIcons/defaultIcon_0" +
                 i +
-                ".jpg") +
+                ".png") +
               ")",
           }}
         ></div>
@@ -76,6 +94,7 @@ export function ProfileSettings(props) {
         return;
       } else {
         setChosenDefaultPic(defaultPic);
+        setExistingDefault(defaultPic);
       }
       return;
     }
@@ -144,6 +163,21 @@ export function ProfileSettings(props) {
 
   function handleDefaultProfilePic(picNum) {
     setChosenDefaultPic(picNum);
+
+    document.querySelector(".defaultPic" + picNum).style.border =
+      "3px solid var(--mainBorderColour)";
+    resetDefaultStyles(picNum);
+  }
+
+  function resetDefaultStyles(exemption) {
+    for (let i = 1; i < 8; i++) {
+      if (i !== exemption) {
+        document.querySelector(".defaultPic" + i).style.border = "";
+      }
+    }
+    if (exemption !== "custom") {
+      document.querySelector(".customPic").style.border = "";
+    }
   }
 
   return (
@@ -151,13 +185,13 @@ export function ProfileSettings(props) {
       <div className="settingsBox">
         <div className="settingsInputCont">
           <div className="settingsLabelBox">
-            <label>Username</label>
+            <label>Username:</label>
           </div>
           <div className="settingsInputBox">
             <input
               className="settingsUsernameInput"
               type="text"
-              defaultValue={usernameInput}
+              defaultValue={usernameDisplay}
               readOnly
             />
           </div>
@@ -165,11 +199,11 @@ export function ProfileSettings(props) {
 
         <div className="settingsInputCont">
           <div className="settingsLabelBox">
-            <label>Display Name</label>
+            <label>Display Name:</label>
           </div>
           <div className="settingsInputBox">
             <input
-              className="settingsNameInput"
+              className="settingsNameInput settingsInput"
               type="text"
               defaultValue={displayNameInput}
               placeholder="Display Name"
@@ -179,8 +213,8 @@ export function ProfileSettings(props) {
         </div>
 
         <div className="settingsInputCont">
-          <div className="settingsLabelBox">
-            <label>Profile Picture</label>
+          <div className="settingsLabelBox ">
+            <label>Profile Picture:</label>
           </div>
           <div className="settingsInputBox">
             <div className="settingsPicChooseCont">
@@ -196,6 +230,9 @@ export function ProfileSettings(props) {
                   setImageUpload(event.target.files[0]);
                   event.target.value = null;
                   setChosenDefaultPic(null);
+                  resetDefaultStyles("custom");
+                  document.querySelector(".customPic").style.border =
+                    "3px solid var(--mainBorderColour)";
                 }}
               />
               <button
@@ -215,7 +252,7 @@ export function ProfileSettings(props) {
 
         <div className="settingsInputCont">
           <div className="settingsLabelBox">
-            <label>Gender</label>
+            <label>Gender:</label>
           </div>
           <div className="settingsInputBox">
             <form className="settingsGenderForm">
@@ -236,12 +273,12 @@ export function ProfileSettings(props) {
 
         <div className="settingsInputCont">
           <div className="settingsLabelBox">
-            <label>Bio</label>
+            <label>Bio:</label>
           </div>
           <div className="settingsInputBox bio">
             <textarea
               placeholder="Bio"
-              className="settingsBio"
+              className="settingsBio settingsInput"
               maxLength={"150"}
               onChange={handleBio}
               defaultValue={bioInput}
@@ -249,7 +286,20 @@ export function ProfileSettings(props) {
             <div className="bioLength">{bioLength}</div>
           </div>
         </div>
-        <button onClick={confirmSettings}>Confirm</button>
+        <button
+          style={{ cursor: cursorStyle }}
+          onMouseOver={() => {
+            if (disableConfirm) {
+              setCursorStyle("wait");
+            } else {
+              setCursorStyle("pointer");
+            }
+          }}
+          className="settingsConfirmButton interactiveButton"
+          onClick={confirmSettings}
+        >
+          Confirm
+        </button>
       </div>
     </div>
   );

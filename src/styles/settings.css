@@ -8,7 +8,6 @@
 .settingsGenderForm {
   display: flex;
   flex-direction: column;
-
   justify-content: center;
   align-items: center;
 }
@@ -19,23 +18,25 @@
 }
 
 .settingsBox {
-  width: 40%;
+  width: 700px;
   padding: 50px 0px 50px 0px;
   gap: 20px;
   justify-content: flex-start;
-
-  border: 1px solid black;
+  border: 1px solid var(--backgroundGray);
+  border-radius: 10px;
 }
 
 .settingsInputCont,
 .settingsGenderForm {
   flex-direction: row;
+  justify-content: center;
 
-  width: 100%;
+  width: 90%;
 }
 
 .settingsLabelBox {
   width: 20%;
+  font-weight: bold;
   height: 100%;
   justify-content: flex-start;
   align-items: flex-end;
@@ -44,16 +45,22 @@
 .settingsInputBox {
   width: 80%;
 }
-.settingsNameInput,
+
 .settingsUsernameInput {
+  width: 80%;
+  color: var(--subTextColour);
+}
+.settingsNameInput {
   border: 1px solid black;
   height: 30px;
   width: 80%;
+  padding: 0px 10px 0px 10px;
 }
 .settingsPicChooseCont {
-  width: 70%;
+  width: 80%;
   flex-wrap: wrap;
   flex-direction: row;
+
   padding: 20px;
   gap: 10px;
 }
@@ -68,26 +75,44 @@
   height: 70px;
   border-radius: 50px;
   overflow: hidden;
-  border: 1px solid rgb(163, 163, 163);
+  border: 1px solid rgb(203, 203, 203);
 
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  cursor: pointer;
+  transition: all 60ms ease-in-out;
+}
+
+.profileDefaultPic:hover,
+.customPic:hover {
+  transform: scale(1.2);
+  filter: brightness(1.1);
+  border: 2px solid var(--mainBorderColour);
+}
+.profileDefaultPic:active,
+.customPic:active {
+  border: 4px solid var(--mainBorderColour);
+  transform: scale(0.95);
+  filter: brightness(0.95);
 }
 
 .customPic {
-  font-size: 250%;
+  font-size: 40px;
   color: rgba(255, 255, 255, 0.699);
-  background-color: rgb(157, 157, 157);
+  padding-bottom: 4px;
+  font-weight: lighter;
+  background-color: var(--backgroundGray);
 }
 
 .settingsGender {
   border: 1px solid black;
   width: 50%;
+  cursor: pointer;
 }
 
 .settingsBio {
-  border: 1px solid rgb(0, 0, 0);
+  padding: 10px 10px 0px 10px;
   width: 80%;
   height: 300px;
   resize: none;
@@ -98,5 +123,33 @@
 }
 .bioLength {
   width: 80%;
-  color: gray;
+  color: var(--subTextColour);
+}
+
+.settingsInput {
+  background-color: white;
+  border: 1px solid lightgray;
+  font-size: 1rem;
+  border-radius: 5px;
+
+  transition: all 50ms ease-in-out;
+}
+
+.settingsInput:focus {
+  border: 2px solid var(--mainBorderColour);
+  transform: scale(1.01);
+}
+.settingsGender:active {
+  border: 2px solid var(--mainBorderColour);
+  transform: scale(1.01);
+}
+
+.settingsConfirmButton {
+  height: 40px;
+  width: 120px;
+  font-size: 1.2rem;
+  color: white;
+  border-radius: 5px;
+  background-color: var(--mainButtonColour);
+  transition: all 20ms ease-in-out;
 }

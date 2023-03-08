@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLoaderData } from "react-router-dom";
 import { Feed } from "./pages/feedPage";
 import { db, Storage } from "./firebaseConfig";
 import { SignUpPage } from "./pages/signUpPage";
@@ -8,6 +8,7 @@ import { ProfilePage } from "./pages/profilePage";
 import { ProfileSettings } from "./pages/profileSettingsPage";
 import { Nav } from "./nav/nav";
 import { About } from "./pages/about";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import "./styles/App.css";
 import { useEffect, useState } from "react";
 import { Auth } from "./firebaseConfig";
@@ -15,6 +16,7 @@ import { set, ref, onValue, update, get, remove } from "firebase/database";
 import uniqid from "uniqid";
 import CreatePostPage from "./pages/createPostPage";
 import { GetCurrentDate } from "./general/getCurrentDate";
+import { useLocation } from "react-router-dom";
 import { uploadBytes, ref as sRef, deleteObject } from "firebase/storage";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -23,12 +25,32 @@ function App() {
   const [user, setUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
   const [passedInfo, setPassedInfo] = useState(null);
+  const [enableSignUp, setEnableSignup] = useState(false);
+
+  const [style, setStyle] = useState({
+    navStyle: { display: "none" },
+    bodyStyle: { width: "100%" },
+  });
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === "/signUp") {
+      setEnableSignup(true);
+    } else {
+      setEnableSignup(false);
+    }
+    if (location.pathname == "/login" || location.pathname == "/signUp") {
+      setStyle({ navStyle: { display: "none" }, bodyStyle: { width: "100%" } });
+    } else {
+      setStyle({ navStyle: { display: "flex" }, bodyStyle: { width: "85%" } });
+    }
+  }, [location]);
 
   useEffect(() => {
     let unsubscribe = onAuthStateChanged(Auth, (gotUser) => {
-      if (gotUser && user === null) {
+      if (user === null && gotUser !== null) {
         setUser(gotUser);
 
         console.log("Currently signed in: " + gotUser.email);
@@ -48,6 +70,12 @@ function App() {
       setPassedInfo(userInfo);
     }
   }, [userInfo]);
+
+  useEffect(() => {
+    if (passedInfo === null) {
+    }
+  }, [passedInfo]);
+
   async function getUser() {
     return user;
   }
@@ -69,20 +97,17 @@ function App() {
   }
 
   async function createNewUser(username) {
-    onAuthStateChanged(Auth, (user) => {
-      if (user) {
-        set(ref(db, "users/" + user.uid), {
-          uid: user.uid,
-          displayName: "",
-          email: user.email,
-          username: username,
-          profilePic: null,
-          gender: "",
-          bio: "",
-        }).then(() => {
-          navigate("/settings");
-        });
-      }
+    set(ref(db, "users/" + Auth.currentUser.uid), {
+      uid: Auth.currentUser.uid,
+      displayName: "",
+      email: Auth.currentUser.email,
+      username: username,
+      profilePic: null,
+      gender: "",
+      bio: "",
+    }).then(() => {
+      setEnableSignup(false);
+      navigate("/settings");
     });
   }
 
@@ -173,6 +198,19 @@ function App() {
       update(currentUserRef, {
         suggestedUsers: suggestedUsers,
       });
+    }
+  }
+
+  async function login(loginEmail, loginPassword) {
+    try {
+      await signInWithEmailAndPassword(Auth, loginEmail, loginPassword).then(
+        () => {
+          updateUserInfo();
+          navigate("/home");
+        }
+      );
+    } catch (error) {
+      alert("Incorrect login details");
     }
   }
 
@@ -411,14 +449,14 @@ function App() {
 
   return (
     <div className="App">
-      <div className="nav">
+      <div className="nav" style={style.navStyle}>
         <Nav getUser={getUser} logout={logout} />
       </div>
-      <div className="body">
+      <div className="body" style={style.bodyStyle}>
         <Routes>
           <Route
             exact
-            path="/"
+            path="/home"
             element={
               <Feed
                 updateFollows={updateFollows}
@@ -430,7 +468,10 @@ function App() {
               />
             }
           />
-          <Route path="/login" element={<LoginPage logout={logout} />} />
+          <Route
+            path="/login"
+            element={<LoginPage login={login} logout={logout} />}
+          />
           <Route
             path="/signUp"
             element={<SignUpPage createNewUser={createNewUser} />}

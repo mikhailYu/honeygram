@@ -1,4 +1,6 @@
-nav {
+nav,
+.navLogoCont,
+.navLink {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -11,6 +13,50 @@ nav {
   position: absolute;
   height: 100%;
   width: 15%;
+  gap: 10px;
+  border-right: 2px solid var(--lightBlueGray);
 
-  border-right: 2px solid rgb(181, 181, 181);
+  min-width: 250px;
+  max-width: 300px;
+  min-height: 800px;
+}
+
+.navLogoCont {
+  width: 100%;
+}
+
+.navLogoCont > img {
+  width: 100%;
+  filter: brightness(60%);
+  transition: all 60m ease-in-out;
+}
+.navLogoCont > img:hover {
+  filter: brightness(0%);
+  transform: scale(1.01);
+}
+
+.navLink {
+  color: black;
+  filter: invert(60%);
+  transition: all 30ms ease-in-out;
+  width: 90%;
+  height: 50px;
+  border: 1px solid black;
+  border-radius: 10px;
+
+  flex-direction: row;
+
+  font-size: 20px;
+  font-weight: light;
+  padding-right: 10px;
+  padding-left: 30px;
+  justify-content: space-between;
+}
+
+.navLink:hover {
+  font-weight: bold;
+}
+
+.navLink > img {
+  width: 35px;
 }

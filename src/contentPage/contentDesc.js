@@ -33,7 +33,9 @@ export function ContentDesc(props) {
       ></div>
       <div className="contentCommentText">
         <div className="contentCommentTop">
-          <p onClick={toProfile}>{displayName}</p>
+          <p className="contentCommentDisplayName" onClick={toProfile}>
+            {displayName}
+          </p>
           <p>{desc}</p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../styles/signUp.css";
 import { useEffect, useState } from "react";
 import { Auth } from "../firebaseConfig";
@@ -8,7 +8,7 @@ export function SignUpPage(props) {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerUsername, setRegisterUsername] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     signOut(Auth);
   }, []);
@@ -46,6 +46,10 @@ export function SignUpPage(props) {
 
   return (
     <div className="signUpPageCont">
+      <img
+        className="signUpLogo"
+        src={require("../images/assets/honeyGramLogo.png")}
+      ></img>
       <div className="signUpBox">
         <form id="signUpForm">
           <input
@@ -69,10 +73,26 @@ export function SignUpPage(props) {
               setRegisterUsername(event.target.value);
             }}
           />
-          <button type="submit" onClick={register}>
+          <div className="signUpDisclaimer">
+            Please do not share any personal or sensitive infomation when using
+            this site. Thank you.
+          </div>
+          <button
+            className="signUpButton interactiveButton"
+            type="submit"
+            onClick={register}
+          >
             Create account
           </button>
         </form>
+        <button
+          onClick={() => {
+            navigate("/login");
+          }}
+          className="signUpGoBackButton"
+        >
+          Back to Login
+        </button>
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ export function ProfilePage(props) {
 
   function loadPosts() {
     if (!owner.posts || owner.posts.length <= 0 || owner.posts[0] === "") {
-      const noPostsDiv = <p>User has no posts</p>;
+      const noPostsDiv = <p className="noPosts">User has no posts</p>;
       setProfileContent(noPostsDiv);
     } else {
       const postsArr = owner.posts.reverse().map((postInfo) => {
@@ -136,14 +136,20 @@ export function ProfilePage(props) {
       if (val.uid !== null && owner.uid !== null) {
         if (val.uid === owner.uid) {
           setUpperButton(
-            <Link className="profilePageEditBtn" to={"/settings"}>
+            <Link
+              className="profilePageFollowBtn interactiveButton"
+              to={"/settings"}
+            >
               Edit
             </Link>
           );
         } else {
           checkIsFollow().then((val) =>
             setUpperButton(
-              <button className="profilePageFollowBtn" onClick={handleFollow}>
+              <button
+                className="profilePageFollowBtn interactiveButton"
+                onClick={handleFollow}
+              >
                 {val}
               </button>
             )
@@ -230,7 +236,6 @@ export function ProfilePage(props) {
           </div>
           <div className="profileDescCont">
             <div className="profileDescTitles">
-              <p>{username}</p>
               <p>{displayName}</p>
             </div>
             <p className="profileDescText">{bio}</p>

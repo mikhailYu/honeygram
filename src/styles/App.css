@@ -13,6 +13,15 @@
   box-sizing: border-box;
 }
 
+:root {
+  --mainBorderColour: rgb(255, 122, 44);
+  --mainButtonColour: rgb(164, 77, 0);
+  --mainTextColour: black;
+  --subTextColour: rgb(112, 116, 119);
+  --backgroundGray: rgb(155, 155, 155);
+  --lightBlueGray: rgb(202, 212, 221);
+}
+
 .App,
 .nav {
   display: flex;
@@ -24,9 +33,12 @@
 
 .App {
   width: 100vw;
+  min-width: 1640px;
   height: 100vh;
+  min-height: 856px;
   overflow-x: hidden;
   flex-direction: row;
+  background-color: rgb(255, 255, 255);
 }
 
 .nav {
@@ -37,4 +49,15 @@
 .body {
   width: 85%;
   height: 100%;
+}
+
+.interactiveButton:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  cursor: pointer;
+}
+
+.interactiveButton:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
 }

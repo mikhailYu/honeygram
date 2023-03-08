@@ -32,6 +32,16 @@ export function Feed(props) {
   }, [props.passedInfo]);
 
   useEffect(() => {
+    if (!Auth.currentUser) {
+      setTimeout(() => {
+        if (!Auth.currentUser) {
+          navigate("/login");
+        }
+      }, 4000);
+    }
+  }, [Auth.currentUser]);
+
+  useEffect(() => {
     if (update) {
       setUserData(props.passedInfo);
       setUpdate(false);
@@ -66,16 +76,18 @@ export function Feed(props) {
     const userRef = ref(db, "users/" + currentUserUid);
     let postsArr;
     get(userRef).then((snapshot) => {
-      postsArr = snapshot.val().feedPosts.map((postID) => {
-        return (
-          <FeedContent
-            passCommentLikes={passCommentLikes}
-            passPostComment={passPostComment}
-            key={uniqid()}
-            postID={postID}
-          />
-        );
-      });
+      if (snapshot.val().feedPosts) {
+        postsArr = snapshot.val().feedPosts.map((postID) => {
+          return (
+            <FeedContent
+              passCommentLikes={passCommentLikes}
+              passPostComment={passPostComment}
+              key={uniqid()}
+              postID={postID}
+            />
+          );
+        });
+      }
       setFeedContentArr(postsArr);
     });
   }
@@ -120,10 +132,11 @@ export function Feed(props) {
           ></div>
           <div className="feedProfileHeaderUserNames">
             <p onClick={goToProfile}>{userUsername}</p>
-            <p onClick={goToProfile}>{userDisplayName}</p>
+            <p>{userDisplayName}</p>
           </div>
           <div className="feedProfileHeaderGap"></div>
           <div
+            className="feedProfileHeaderLogoutBtn"
             onClick={() => {
               props.logout();
             }}
