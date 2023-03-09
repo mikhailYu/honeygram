@@ -37,7 +37,8 @@ export function LoginPage(props) {
             />
             <button
               type="submit"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 props.login(loginEmail, loginPassword);
               }}
             >

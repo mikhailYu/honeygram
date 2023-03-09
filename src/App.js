@@ -163,7 +163,7 @@ function App() {
     let chosenUsers = [];
     let usersArr = [];
 
-    onValue(usersRef, (snapshot) => {
+    get(usersRef).then((snapshot) => {
       snapshot.forEach((user) => {
         usersArr.push(user.val());
       });
@@ -191,13 +191,12 @@ function App() {
           return false;
         }
       }
+      handleSuggestsUpdate();
     });
-    handleSuggestsUpdate();
 
     function handleSuggestsUpdate() {
       const currentUserRef = ref(db, "users/" + currentUserUid);
       const suggestedUsers = Object.assign({}, chosenUsers);
-
       update(currentUserRef, {
         suggestedUsers: suggestedUsers,
       });

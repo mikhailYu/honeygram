@@ -54,14 +54,14 @@ export function SignUpPage(props) {
         <form id="signUpForm">
           <input
             type="text"
-            placeholder="New Email"
+            placeholder="Email"
             onChange={(event) => {
               setRegisterEmail(event.target.value);
             }}
           />
           <input
             type="password"
-            placeholder="New Password"
+            placeholder="Password (6+ characters)"
             onChange={(event) => {
               setRegisterPassword(event.target.value);
             }}
@@ -86,7 +86,8 @@ export function SignUpPage(props) {
           </button>
         </form>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
             navigate("/login");
           }}
           className="signUpGoBackButton"
